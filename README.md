@@ -1,6 +1,6 @@
 # 🎯 Trackio
 
-`trackio` is a lightweight alternative for `wandb` that uses Hugging Face Datasets for experiment logging and Gradio / Spaces for visualization.
+`trackio` is a lightweight alternative for `wandb` that uses 🤗 Datasets for experiment logging and Gradio / 🤗 Spaces for visualization.
 
 ## Features
 - **API compatible** with `wandb.init`, `wandb.log`, and `wandb.finish` (drop-in replacement: just use `trackio` instead of `wandb`)
