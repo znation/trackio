@@ -1,7 +1,5 @@
 <p align="center" style="font-size: 4rem; font-weight:bold">
-<h2>
  🎯 Trackio
- </h2>
 </p>
 
 `trackio` is a lightweight alternative for `wandb` that uses 🤗 Datasets for experiment logging and Gradio / 🤗 Spaces for visualization.
