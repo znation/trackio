@@ -7,7 +7,7 @@ Trackio is a drop-in replacement for `wandb` that uses Hugging Face Datasets for
 - Stores logs in a Hugging Face Datasets-compatible format (Parquet)
 - Visualize experiments with a Gradio dashboard
 - *Local-first* design: your dashboard runs locally by default. You can also host it on Spaces by changing a single parameter.
-- Everything mentioned, including hosting on Spaces, is free!
+- Everything here, including hosting on Spaces, is **free**!
 
 ## Example Usage
 ```python
