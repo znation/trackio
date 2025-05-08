@@ -1,9 +1,9 @@
 # 🎯 Trackio
 
-Trackio is a drop-in replacement for `wandb` that uses Hugging Face Datasets for experiment logging and Gradio / Spaces for visualization.
+Trackio is a lightweight alternative for `wandb` that uses Hugging Face Datasets for experiment logging and Gradio / Spaces for visualization.
 
 ## Features
-- **API compatible** with `wandb.init`, `wandb.log`, and `wandb.finish` (use `trackio` instead)
+- **API compatible** with `wandb.init`, `wandb.log`, and `wandb.finish` (drop-in replacement: just use `trackio` instead of `wandb`)
 - Stores logs in a Hugging Face Datasets-compatible format (Parquet)
 - Visualize experiments with a Gradio dashboard
 - *Local-first* design: your dashboard runs locally by default. You can also host it on Spaces by changing a single parameter.
@@ -41,6 +41,8 @@ for run in range(total_runs):
 # To launch the Gradio UI:
 trackio.ui()
 ```
+
+Trackio is designed to be lightweight (<500 lines of code total), not fully-featured. It is designed in a modular way so that developers can easily fork the repository and add functionality that they care about.
 
 ## Data Storage
 - Logs are saved in `./trackio/{project}/{run_name}/run.parquet`
