@@ -55,7 +55,7 @@ def plot_metrics(df):
 
 
 def update_runs(project):
-    return gr.Dropdown.update(choices=get_runs(project), value=None)
+    return gr.Dropdown(choices=get_runs(project), value=None)
 
 
 def update_dashboard(project, run):
@@ -67,8 +67,7 @@ def update_dashboard(project, run):
         )
     df, config = load_run_data(project, run)
     plots = plot_metrics(df)
-    config_str = json.dumps(config, indent=2)
-    return plots, gr.JSON.update(value=config), gr.update(visible=True)
+    return plots, gr.JSON(value=config), gr.update(visible=True)
 
 
 def launch_ui():
@@ -78,7 +77,7 @@ def launch_ui():
             project_dd = gr.Dropdown(label="Project", choices=get_projects())
             run_dd = gr.Dropdown(label="Run", choices=[])
         with gr.Row():
-            plot_output = gr.Plot(
+            plot_output = gr.LinePlot(
                 label="Metrics",
                 visible=False,
                 show_label=True,
