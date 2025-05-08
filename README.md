@@ -1,4 +1,4 @@
-<center><h1> 🎯 Trackio </center></h1>
+<h1><center> 🎯 Trackio</center></h1>
 
 `trackio` is a lightweight alternative for `wandb` that uses 🤗 Datasets for experiment logging and Gradio / 🤗 Spaces for visualization.
 
