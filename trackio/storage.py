@@ -2,6 +2,7 @@ import os
 from datasets import Dataset
 import pandas as pd
 
+
 class TrackioStorage:
     def __init__(self, project, name, config):
         self.project = project
@@ -14,12 +15,15 @@ class TrackioStorage:
         self.config_path = os.path.join(self.dir, "config.json")
         # Save config immediately
         import json
+
         with open(self.config_path, "w") as f:
             json.dump(self.config, f, indent=2)
+
     def log(self, metrics):
         self.logs.append(metrics)
+
     def finish(self):
         if self.logs:
             df = pd.DataFrame(self.logs)
             ds = Dataset.from_pandas(df)
-            ds.to_parquet(self.run_path) 
+            ds.to_parquet(self.run_path)
