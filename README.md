@@ -6,9 +6,9 @@
 
 ## Features
 - **API compatible** with `wandb.init`, `wandb.log`, and `wandb.finish` (drop-in replacement: just use `trackio` instead of `wandb`)
-- Stores logs in a Hugging Face Datasets-compatible format (Parquet)
+- Store logs in a Hugging Face Datasets-compatible format (Parquet)
 - Visualize experiments with a Gradio dashboard
-- *Local-first* design: your dashboard runs locally by default. You can also host it on Spaces by changing a single parameter.
+- *Local-first* design: dashboard runs locally by default. You can also host it on Spaces by changing a single parameter.
 - Everything here, including hosting on Spaces, is **free**!
 
 ## Example Usage
