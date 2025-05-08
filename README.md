@@ -1,4 +1,4 @@
-<p align="center" style="font-size: 2rem; font-weight:bold">
+<p align="center" style="font-size: 4rem; font-weight:bold">
  🎯 Trackio
 </p>
 
