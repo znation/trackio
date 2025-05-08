@@ -50,6 +50,8 @@ def launch_ui():
         with gr.Row():
             run_dd = gr.Dropdown(label="Run", choices=[], multiselect=True)
         
+        timer = gr.Timer(value=1)
+
         gr.on(
             [demo.load, project_dd.change],
             fn=update_runs,
@@ -58,7 +60,7 @@ def launch_ui():
         )
         
         @gr.render(
-            triggers=[run_dd.change],
+            triggers=[run_dd.change, timer.tick],
             inputs=[project_dd, run_dd],
         )
         def update_dashboard(project, runs):
