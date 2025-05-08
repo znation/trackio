@@ -9,11 +9,12 @@ from trackio.utils import RESERVED_KEYS, TRACKIO_DIR
 def get_projects():
     if not os.path.exists(TRACKIO_DIR):
         return []
-    return [
+    projects = sorted([
         d
         for d in os.listdir(TRACKIO_DIR)
         if os.path.isdir(os.path.join(TRACKIO_DIR, d))
-    ]
+    ])
+    return gr.Dropdown(label="Project", choices=projects, value=projects[0] if projects else None)
 
 
 def get_runs(project):
@@ -38,25 +39,48 @@ def load_run_data(project, run):
 
 
 def update_runs(project):
-    runs = get_runs(project)
+    if project is None:
+        runs = []
+    else:
+        runs = get_runs(project)
     return gr.Dropdown(choices=runs, value=runs)
+
+
+def toggle_timer(cb_value):
+    if cb_value:
+        return gr.Timer(active=True)
+    else:
+        return gr.Timer(active=False)
 
 
 def launch_ui():
     with gr.Blocks(theme="citrus") as demo:
         with gr.Sidebar():
             gr.Markdown("# 🎯 Trackio Dashboard")
-            project_dd = gr.Dropdown(label="Project", choices=get_projects())
+            project_dd = gr.Dropdown(label="Project")
+            realtime_cb = gr.Checkbox(label="Realtime", value=True)
         with gr.Row():
             run_dd = gr.Dropdown(label="Run", choices=[], multiselect=True)
         
         timer = gr.Timer(value=1)
 
         gr.on(
-            [demo.load, project_dd.change],
+            [demo.load, timer.tick],
+            fn=get_projects,
+            outputs=project_dd,
+            show_progress=False,
+        )
+        gr.on(
+            [demo.load, project_dd.change, timer.tick],
             fn=update_runs,
             inputs=project_dd,
             outputs=run_dd,
+            show_progress=False,
+        )
+        realtime_cb.change(
+            fn=toggle_timer,
+            inputs=realtime_cb,
+            outputs=timer,
         )
         
         @gr.render(

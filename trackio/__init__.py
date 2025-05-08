@@ -1,14 +1,27 @@
+import contextvars
 import logging
 from pathlib import Path
 
-from trackio.run import Run, current_run
+from trackio.run import Run
 from trackio.ui import launch_ui
 
 __version__ = Path(__file__).parent.joinpath("version.txt").read_text().strip()
 
 
-def init(project, name=None, config=None):
+current_run: contextvars.ContextVar[Run | None] = contextvars.ContextVar(
+    "current_run", default=None
+)
+
+current_ui: contextvars.ContextVar[bool] = contextvars.ContextVar(
+    "ui_running", default=False
+)
+
+
+def init(project, name=None, config=None, ui=True):
     logging.info(f"Initializing run | Project: {project} | Name: {name}")
+    if ui and not current_ui.get():
+        launch_ui()
+        current_ui.set(True)
     current_run.set(Run(project, name, config))
 
 

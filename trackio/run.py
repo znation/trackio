@@ -1,5 +1,3 @@
-import contextvars
-
 from trackio.storage import TrackioStorage
 from trackio.utils import generate_readable_name
 
@@ -20,6 +18,3 @@ class Run:
         self.storage.finish()
 
 
-current_run: contextvars.ContextVar[Run | None] = contextvars.ContextVar(
-    "current_run", default=None
-)
