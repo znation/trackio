@@ -20,4 +20,6 @@ class Run:
         self.storage.finish()
 
 
-current_run: contextvars.ContextVar[Run | None] = contextvars.ContextVar("current_run", default=None)
+current_run: contextvars.ContextVar[Run | None] = contextvars.ContextVar(
+    "current_run", default=None
+)
