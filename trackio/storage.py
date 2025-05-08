@@ -1,9 +1,8 @@
+import csv
 import json
 import os
-import csv
 
-import pandas as pd
-from datasets import Dataset
+from trackio.utils import RESERVED_KEYS, TRACKIO_DIR
 
 
 class TrackioStorage:
@@ -11,17 +10,23 @@ class TrackioStorage:
         self.project = project
         self.name = name
         self.config = config
-        self.dir = os.path.join("trackio", project, self.name)
+        self.dir = os.path.join(TRACKIO_DIR, project, self.name)
         os.makedirs(self.dir, exist_ok=True)
         self.csv_path = os.path.join(self.dir, "run.csv")
         self.parquet_path = os.path.join(self.dir, "run.parquet")
         self.config_path = os.path.join(self.dir, "config.json")
-        self.headers = None
+        self.headers = []
 
         with open(self.config_path, "w") as f:
             json.dump(self.config, f, indent=2)
 
     def log(self, metrics: dict):
+        for k in metrics.keys():
+            if k in RESERVED_KEYS or k.startswith("__"):
+                raise ValueError(
+                    f"Please do not use this reserved key as a metric: {k}"
+                )
+
         if not os.path.exists(self.csv_path) or os.path.getsize(self.csv_path) == 0:
             self.headers = list(metrics.keys())
             with open(self.csv_path, "w", newline="") as f:
@@ -52,8 +57,9 @@ class TrackioStorage:
                 writer = csv.DictWriter(f, fieldnames=self.headers)
                 writer.writerow({h: metrics.get(h, "") for h in self.headers})
 
-    # def finish(self):
-    #     if self.logs:
-    #         df = pd.DataFrame(self.logs)
-    #         ds = Dataset.from_pandas(df)
-    #         ds.to_parquet(self.run_path)
+    def finish(self):
+        pass
+        # if self.logs:
+        #     df = pd.DataFrame(self.logs)
+        #     ds = Dataset.from_pandas(df)
+        #     ds.to_parquet(self.run_path)

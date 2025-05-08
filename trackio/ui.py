@@ -1,11 +1,9 @@
-import json
 import os
 
 import gradio as gr
 import pandas as pd
-import plotly.express as px
 
-TRACKIO_DIR = "trackio"
+from trackio.utils import RESERVED_KEYS, TRACKIO_DIR
 
 
 def get_projects():
@@ -31,68 +29,56 @@ def get_runs(project):
 
 def load_run_data(project, run):
     run_dir = os.path.join(TRACKIO_DIR, project, run)
-    run_path = os.path.join(run_dir, "run.parquet")
-    config_path = os.path.join(run_dir, "config.json")
+    csv_path = os.path.join(run_dir, "run.csv")
     df = None
-    config = {}
-    if os.path.exists(run_path):
-        df = pd.read_parquet(run_path)
-    if os.path.exists(config_path):
-        with open(config_path) as f:
-            config = json.load(f)
-    return df, config
-
-
-def plot_metrics(df):
-    if df is None or df.empty:
-        return None
-    plots = []
-    numeric_cols = df.select_dtypes(include="number").columns
-    for col in numeric_cols:
-        fig = px.line(df, y=col, title=col)
-        plots.append(fig)
-    return plots
+    if os.path.exists(csv_path):
+        df = pd.read_csv(csv_path)
+        df["step"] = range(len(df))
+    return df
 
 
 def update_runs(project):
-    return gr.Dropdown(choices=get_runs(project), value=None)
-
-
-def update_dashboard(project, run):
-    if not project or not run:
-        return (
-            gr.update(visible=False),
-            gr.update(visible=False),
-            gr.update(visible=False),
-        )
-    df, config = load_run_data(project, run)
-    plots = plot_metrics(df)
-    return plots, gr.JSON(value=config), gr.update(visible=True)
+    runs = get_runs(project)
+    return gr.Dropdown(choices=runs, value=runs)
 
 
 def launch_ui():
-    with gr.Blocks() as demo:
-        gr.Markdown("# Trackio Dashboard")
-        with gr.Row():
+    with gr.Blocks(theme="citrus") as demo:
+        with gr.Sidebar():
+            gr.Markdown("# 🎯 Trackio Dashboard")
             project_dd = gr.Dropdown(label="Project", choices=get_projects())
-            run_dd = gr.Dropdown(label="Run", choices=[])
         with gr.Row():
-            plot_output = gr.LinePlot(
-                label="Metrics",
-                visible=False,
-                show_label=True,
-                elem_id="metrics-plot",
-                interactive=True,
-                scale=2,
-            )
-            config_output = gr.JSON(label="Config", visible=False)
-        # Events
-        project_dd.change(
-            fn=lambda p: update_runs(p), inputs=project_dd, outputs=run_dd
+            run_dd = gr.Dropdown(label="Run", choices=[], multiselect=True)
+        
+        gr.on(
+            [demo.load, project_dd.change],
+            fn=update_runs,
+            inputs=project_dd,
+            outputs=run_dd,
         )
-        run_dd.change(
-            fn=lambda p, r: update_dashboard(p, r),
+        
+        @gr.render(
+            triggers=[run_dd.change],
             inputs=[project_dd, run_dd],
-            outputs=[plot_output, config_output, plot_output],
         )
-    demo.launch()
+        def update_dashboard(project, runs):
+            dfs = []
+            for run in runs:
+                df = load_run_data(project, run)
+                if df is not None:
+                    df["run"] = run
+                    dfs.append(df)
+            if dfs:
+                master_df = pd.concat(dfs, ignore_index=True)
+            else:
+                master_df = pd.DataFrame()
+            numeric_cols = master_df.select_dtypes(include="number").columns
+            numeric_cols = [c for c in numeric_cols if c not in RESERVED_KEYS]
+            for col in numeric_cols:
+                gr.LinePlot(master_df, x="step", y=col, color="run" if "run" in master_df.columns else None, title=col)
+
+    demo.launch(show_api=False)
+
+
+if __name__ == "__main__":
+    launch_ui()
