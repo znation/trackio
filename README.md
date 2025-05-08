@@ -16,12 +16,16 @@
 import random
 import math
 import trackio
+import time
+
+sleep_time = 0.5
 
 # Launch 5 simulated experiments
 total_runs = 5
 for run in range(total_runs):
+    
     trackio.init(
-        project="basic-intro",
+        project="basic-intro-4",
         name=f"experiment_{run}",
         config={
             "learning_rate": 0.02,
@@ -30,18 +34,15 @@ for run in range(total_runs):
             "epochs": 10,
         },
     )
+    time.sleep(sleep_time)
 
     epochs = 10
     offset = random.random() / 5
     for epoch in range(2, epochs):
-        acc = 1 - 2 ** -epoch - random.random() / epoch - offset
-        loss = 2 ** -epoch + random.random() / epoch + offset
+        time.sleep(sleep_time)
+        acc = 1 - 2**-epoch - random.random() / epoch - offset
+        loss = 2**-epoch + random.random() / epoch + offset
         trackio.log({"acc": acc, "loss": loss})
-
-    trackio.finish()
-
-# To launch the Gradio UI:
-trackio.ui()
 ```
 
 Trackio is designed to be lightweight (<500 lines of code total), not fully-featured. It is designed in a modular way so that developers can easily fork the repository and add functionality that they care about.
