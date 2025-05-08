@@ -1,4 +1,4 @@
-# Trackio
+# 🎯 Trackio
 
 Trackio is a drop-in replacement for `wandb` that uses Hugging Face Datasets for experiment logging and Gradio for visualization.
 
