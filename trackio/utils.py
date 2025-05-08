@@ -3,6 +3,7 @@ import random
 RESERVED_KEYS = ["step", "epoch", "batch", "run", "timestamp"]
 TRACKIO_DIR = ".trackio"
 
+
 def generate_readable_name():
     """
     Generates a random, readable name like "dainty-sunset-1"

@@ -9,12 +9,16 @@ from trackio.utils import RESERVED_KEYS, TRACKIO_DIR
 def get_projects():
     if not os.path.exists(TRACKIO_DIR):
         return []
-    projects = sorted([
-        d
-        for d in os.listdir(TRACKIO_DIR)
-        if os.path.isdir(os.path.join(TRACKIO_DIR, d))
-    ])
-    return gr.Dropdown(label="Project", choices=projects, value=projects[0] if projects else None)
+    projects = sorted(
+        [
+            d
+            for d in os.listdir(TRACKIO_DIR)
+            if os.path.isdir(os.path.join(TRACKIO_DIR, d))
+        ]
+    )
+    return gr.Dropdown(
+        label="Project", choices=projects, value=projects[0] if projects else None
+    )
 
 
 def get_runs(project):
@@ -61,7 +65,7 @@ def launch_ui():
             realtime_cb = gr.Checkbox(label="Realtime", value=True)
         with gr.Row():
             run_dd = gr.Dropdown(label="Run", choices=[], multiselect=True)
-        
+
         timer = gr.Timer(value=1)
 
         gr.on(
@@ -82,7 +86,7 @@ def launch_ui():
             inputs=realtime_cb,
             outputs=timer,
         )
-        
+
         @gr.render(
             triggers=[run_dd.change, timer.tick],
             inputs=[project_dd, run_dd],
@@ -101,7 +105,13 @@ def launch_ui():
             numeric_cols = master_df.select_dtypes(include="number").columns
             numeric_cols = [c for c in numeric_cols if c not in RESERVED_KEYS]
             for col in numeric_cols:
-                gr.LinePlot(master_df, x="step", y=col, color="run" if "run" in master_df.columns else None, title=col)
+                gr.LinePlot(
+                    master_df,
+                    x="step",
+                    y=col,
+                    color="run" if "run" in master_df.columns else None,
+                    title=col,
+                )
 
     demo.launch(show_api=False)
 

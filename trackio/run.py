@@ -16,5 +16,3 @@ class Run:
 
     def finish(self):
         self.storage.finish()
-
-
