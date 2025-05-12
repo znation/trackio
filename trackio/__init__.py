@@ -22,8 +22,9 @@ config = {}
 
 def init(project, name=None, config=None):
     if not current_server.get():
-        url = launch_gradio()
+        url = launch_gradio(show_api=False, inline=False, quiet=True)
         print(f"* Trackio server launched at: {url}")
+        print(f"** View project dashboard at: {url}?project={project}")
         current_server.set(url)
     else:
         url = current_server.get()
