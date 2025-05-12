@@ -1,43 +1,36 @@
-import os
+from typing import Any
 
 import gradio as gr
 import pandas as pd
 
-from trackio.utils import RESERVED_KEYS, TRACKIO_DIR
+from trackio.sqlite_storage import SQLiteStorage
+from trackio.utils import RESERVED_KEYS
 
 
 def get_projects():
-    if not os.path.exists(TRACKIO_DIR):
-        return []
-    projects = sorted(
-        [
-            d
-            for d in os.listdir(TRACKIO_DIR)
-            if os.path.isdir(os.path.join(TRACKIO_DIR, d))
-        ]
-    )
+    storage = SQLiteStorage("", "", {})
+    projects = storage.get_projects()
     return gr.Dropdown(
         label="Project", choices=projects, value=projects[0] if projects else None
     )
 
 
 def get_runs(project):
-    project_dir = os.path.join(TRACKIO_DIR, project)
-    if not os.path.exists(project_dir):
+    if not project:
         return []
-    return [
-        d
-        for d in os.listdir(project_dir)
-        if os.path.isdir(os.path.join(project_dir, d))
-    ]
+    storage = SQLiteStorage("", "", {})
+    return storage.get_runs(project)
 
 
 def load_run_data(project, run):
-    run_dir = os.path.join(TRACKIO_DIR, project, run)
-    csv_path = os.path.join(run_dir, "run.csv")
-    df = None
-    if os.path.exists(csv_path):
-        df = pd.read_csv(csv_path)
+    if not project or not run:
+        return None
+    storage = SQLiteStorage("", "", {})
+    metrics = storage.get_metrics(project, run)
+    if not metrics:
+        return None
+    df = pd.DataFrame(metrics)
+    if "step" not in df.columns:
         df["step"] = range(len(df))
     return df
 
@@ -57,12 +50,18 @@ def toggle_timer(cb_value):
         return gr.Timer(active=False)
 
 
-def launch_ui():
+def log(project: str, run: str, metrics: dict[str, Any]) -> None:
+    storage = SQLiteStorage(project, run, {})
+    storage.log(metrics)
+
+
+def launch_gradio() -> str:
     with gr.Blocks(theme="citrus") as demo:
         with gr.Sidebar():
             gr.Markdown("# 🎯 Trackio Dashboard")
             project_dd = gr.Dropdown(label="Project")
-            realtime_cb = gr.Checkbox(label="Realtime", value=True)
+            gr.Markdown("### ⚙️ Settings")
+            realtime_cb = gr.Checkbox(label="Refresh realtime", value=True)
         with gr.Row():
             run_dd = gr.Dropdown(label="Run", choices=[], multiselect=True)
 
@@ -72,19 +71,25 @@ def launch_ui():
             [demo.load, timer.tick],
             fn=get_projects,
             outputs=project_dd,
-            show_progress=False,
+            show_progress="hidden",
         )
         gr.on(
             [demo.load, project_dd.change, timer.tick],
             fn=update_runs,
             inputs=project_dd,
             outputs=run_dd,
-            show_progress=False,
+            show_progress="hidden",
         )
         realtime_cb.change(
             fn=toggle_timer,
             inputs=realtime_cb,
             outputs=timer,
+            api_name="toggle_timer",
+        )
+
+        gr.api(
+            fn=log,
+            api_name="log",
         )
 
         @gr.render(
@@ -113,8 +118,9 @@ def launch_ui():
                     title=col,
                 )
 
-    demo.launch(show_api=False)
+    _, url, _ = demo.launch(show_api=False, inline=False, quiet=True)
+    return url
 
 
 if __name__ == "__main__":
-    launch_ui()
+    launch_gradio()
