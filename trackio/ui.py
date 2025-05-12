@@ -15,7 +15,10 @@ def get_projects(request: gr.Request):
     else:
         project = projects[0] if projects else None
     return gr.Dropdown(
-        label="Project", choices=projects, value=project, allow_custom_value=True,
+        label="Project",
+        choices=projects,
+        value=project,
+        allow_custom_value=True,
     )
 
 
@@ -121,9 +124,11 @@ with gr.Blocks(theme="citrus") as demo:
                 title=col,
             )
 
+
 def launch_gradio(**kwargs) -> str:
     _, url, _ = demo.launch(**kwargs)
     return url
+
 
 if __name__ == "__main__":
     launch_gradio()
