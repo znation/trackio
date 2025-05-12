@@ -1,10 +1,9 @@
-import os
 
 import gradio as gr
 import pandas as pd
 
-from trackio.utils import RESERVED_KEYS, TRACKIO_DIR
 from trackio.sqlite_storage import SQLiteStorage
+from trackio.utils import RESERVED_KEYS
 
 
 def get_projects():
