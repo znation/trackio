@@ -11,7 +11,7 @@ wandb.init(
         epochs=5,
         learning_rate=0.001,
         batch_size=32,
-    )
+    ),
 )
 
 EPOCHS = 5
@@ -41,12 +41,14 @@ for epoch in range(EPOCHS):
     val_loss /= NUM_VAL_BATCHES
     val_accuracy /= NUM_VAL_BATCHES
 
-    wandb.log({
-        "epoch": epoch + 1,
-        "train_loss": train_loss,
-        "train_accuracy": train_accuracy,
-        "val_loss": val_loss,
-        "val_accuracy": val_accuracy,
-    })
+    wandb.log(
+        {
+            "epoch": epoch + 1,
+            "train_loss": train_loss,
+            "train_accuracy": train_accuracy,
+            "val_loss": val_loss,
+            "val_accuracy": val_accuracy,
+        }
+    )
 
 wandb.finish()
