@@ -16,13 +16,16 @@ current_ui: contextvars.ContextVar[bool] = contextvars.ContextVar(
     "ui_running", default=False
 )
 
+config = {}
 
 def init(project, name=None, config=None, ui=True):
     logging.info(f"Initializing run | Project: {project} | Name: {name}")
     if ui and not current_ui.get():
         launch_ui()
         current_ui.set(True)
-    current_run.set(Run(project, name, config))
+    run = Run(project, name, config)
+    current_run.set(run)
+    globals()["config"] = run.config
 
 
 def log(metrics):
