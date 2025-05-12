@@ -57,12 +57,13 @@ def toggle_timer(cb_value):
         return gr.Timer(active=False)
 
 
-def launch_ui():
+def launch_gradio() -> str:
     with gr.Blocks(theme="citrus") as demo:
         with gr.Sidebar():
             gr.Markdown("# 🎯 Trackio Dashboard")
             project_dd = gr.Dropdown(label="Project")
-            realtime_cb = gr.Checkbox(label="Realtime", value=True)
+            gr.Markdown("### ⚙️ Settings")
+            realtime_cb = gr.Checkbox(label="Refresh realtime", value=True)
         with gr.Row():
             run_dd = gr.Dropdown(label="Run", choices=[], multiselect=True)
 
@@ -72,14 +73,14 @@ def launch_ui():
             [demo.load, timer.tick],
             fn=get_projects,
             outputs=project_dd,
-            show_progress=False,
+            show_progress="hidden",
         )
         gr.on(
             [demo.load, project_dd.change, timer.tick],
             fn=update_runs,
             inputs=project_dd,
             outputs=run_dd,
-            show_progress=False,
+            show_progress="hidden",
         )
         realtime_cb.change(
             fn=toggle_timer,
@@ -113,8 +114,8 @@ def launch_ui():
                     title=col,
                 )
 
-    demo.launch(show_api=False)
-
+    _, url, _ = demo.launch(show_api=False, inline=False, quiet=True)
+    return url
 
 if __name__ == "__main__":
     launch_ui()
