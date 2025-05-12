@@ -12,13 +12,9 @@ class SQLiteStorage:
         self.config = config
         self.db_path = os.path.join(TRACKIO_DIR, "trackio.db")
 
-        # Ensure .trackio directory exists
         os.makedirs(TRACKIO_DIR, exist_ok=True)
 
-        # Initialize database if it doesn't exist
         self._init_db()
-
-        # Save config
         self._save_config()
 
     def _init_db(self):
@@ -26,21 +22,16 @@ class SQLiteStorage:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
 
-            # Create metrics table if it doesn't exist
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS metrics (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                     project_name TEXT NOT NULL,
                     run_name TEXT NOT NULL,
-                    step INTEGER,
-                    epoch INTEGER,
-                    batch INTEGER,
                     metrics TEXT NOT NULL
                 )
             """)
 
-            # Create configs table if it doesn't exist
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS configs (
                     project_name TEXT NOT NULL,

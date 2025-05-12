@@ -1,3 +1,4 @@
+from typing import Any
 
 import gradio as gr
 import pandas as pd
@@ -49,7 +50,7 @@ def toggle_timer(cb_value):
         return gr.Timer(active=False)
 
 
-def log(project: str, run: str, metrics: dict):
+def log(project: str, run: str, metrics: dict[str, Any]) -> None:
     storage = SQLiteStorage(project, run, {})
     storage.log(metrics)
 
@@ -83,6 +84,12 @@ def launch_gradio() -> str:
             fn=toggle_timer,
             inputs=realtime_cb,
             outputs=timer,
+            api_name="toggle_timer",
+        )
+
+        gr.api(
+            fn=log,
+            api_name="log",
         )
 
         @gr.render(
