@@ -1,6 +1,6 @@
 import random
 
-RESERVED_KEYS = ["step", "epoch", "batch", "run", "timestamp"]
+RESERVED_KEYS = ["project", "run", "timestamp"]
 TRACKIO_DIR = ".trackio"
 
 

@@ -1,4 +1,4 @@
-from trackio.storage import TrackioStorage
+from trackio.sqlite_storage import SQLiteStorage
 from trackio.utils import generate_readable_name
 
 
@@ -9,7 +9,7 @@ class Run:
         self.project = project
         self.name = name or generate_readable_name()
         self.config = config or {}
-        self.storage = TrackioStorage(project, name, config)
+        self.storage = SQLiteStorage(project, name, config)
 
     def log(self, metrics: dict):
         self.storage.log(metrics)

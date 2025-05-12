@@ -4,40 +4,33 @@ import gradio as gr
 import pandas as pd
 
 from trackio.utils import RESERVED_KEYS, TRACKIO_DIR
+from trackio.sqlite_storage import SQLiteStorage
 
 
 def get_projects():
-    if not os.path.exists(TRACKIO_DIR):
-        return []
-    projects = sorted(
-        [
-            d
-            for d in os.listdir(TRACKIO_DIR)
-            if os.path.isdir(os.path.join(TRACKIO_DIR, d))
-        ]
-    )
+    storage = SQLiteStorage("", "", {})
+    projects = storage.get_projects()
     return gr.Dropdown(
         label="Project", choices=projects, value=projects[0] if projects else None
     )
 
 
 def get_runs(project):
-    project_dir = os.path.join(TRACKIO_DIR, project)
-    if not os.path.exists(project_dir):
+    if not project:
         return []
-    return [
-        d
-        for d in os.listdir(project_dir)
-        if os.path.isdir(os.path.join(project_dir, d))
-    ]
+    storage = SQLiteStorage("", "", {})
+    return storage.get_runs(project)
 
 
 def load_run_data(project, run):
-    run_dir = os.path.join(TRACKIO_DIR, project, run)
-    csv_path = os.path.join(run_dir, "run.csv")
-    df = None
-    if os.path.exists(csv_path):
-        df = pd.read_csv(csv_path)
+    if not project or not run:
+        return None
+    storage = SQLiteStorage("", "", {})
+    metrics = storage.get_metrics(project, run)
+    if not metrics:
+        return None
+    df = pd.DataFrame(metrics)
+    if "step" not in df.columns:
         df["step"] = range(len(df))
     return df
 
@@ -55,6 +48,11 @@ def toggle_timer(cb_value):
         return gr.Timer(active=True)
     else:
         return gr.Timer(active=False)
+
+
+def log(project: str, run: str, metrics: dict):
+    storage = SQLiteStorage(project, run, {})
+    storage.log(metrics)
 
 
 def launch_gradio() -> str:
@@ -119,4 +117,4 @@ def launch_gradio() -> str:
 
 
 if __name__ == "__main__":
-    launch_ui()
+    launch_gradio()
