@@ -106,6 +106,9 @@ def simulate_multiple_runs():
 simulate_multiple_runs()
 ```
 
+![Uploading Screen Recording 2025-05-12 at 2.43.38 PM.gif…]()
+
+
 ## License
 
 MIT License 
