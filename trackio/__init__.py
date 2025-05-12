@@ -18,6 +18,7 @@ server_running: contextvars.ContextVar[bool] = contextvars.ContextVar(
 
 config = {}
 
+
 def init(project, name=None, config=None):
     logging.info(f"Initializing run | Project: {project} | Name: {name}")
     if not server_running.get():
@@ -40,5 +41,3 @@ def finish():
         raise RuntimeError("Call trackio.init() before finish().")
     current_run.get().finish()
     current_run.set(None)
-
-

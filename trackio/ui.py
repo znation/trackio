@@ -117,5 +117,6 @@ def launch_gradio() -> str:
     _, url, _ = demo.launch(show_api=False, inline=False, quiet=True)
     return url
 
+
 if __name__ == "__main__":
     launch_ui()
