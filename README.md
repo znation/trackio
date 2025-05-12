@@ -60,6 +60,12 @@ Trackio is designed to be lightweight (<500 lines of code total), not fully-feat
 pip install trackio
 ```
 
+or with `uv`:
+
+```py
+uv pip install trackio
+```
+
 ## Usage
 
 ```python
