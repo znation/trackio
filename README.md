@@ -13,12 +13,6 @@
 
 Trackio is designed to be lightweight (<500 lines of code total), not fully-featured. It is designed in a modular way so that developers can easily fork the repository and add functionality that they care about.
 
-## Data Storage
-- Logs are saved in `./trackio/{project}/{run_name}/run.parquet`
-- Config is saved as `config.json` in the same directory
-
-## Visualization
-- Run `trackio.ui()` to launch the Gradio dashboard and explore your experiments
 
 ## Installation
 
