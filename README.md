@@ -11,40 +11,6 @@
 - *Local-first* design: dashboard runs locally by default. You can also host it on Spaces by changing a single parameter.
 - Everything here, including hosting on Spaces, is **free**!
 
-## Example Usage
-```python
-import random
-import math
-import trackio
-import time
-
-sleep_time = 0.5
-
-# Launch 5 simulated experiments
-total_runs = 5
-for run in range(total_runs):
-    
-    trackio.init(
-        project="basic-intro-4",
-        name=f"experiment_{run}",
-        config={
-            "learning_rate": 0.02,
-            "architecture": "CNN",
-            "dataset": "CIFAR-100",
-            "epochs": 10,
-        },
-    )
-    time.sleep(sleep_time)
-
-    epochs = 10
-    offset = random.random() / 5
-    for epoch in range(2, epochs):
-        time.sleep(sleep_time)
-        acc = 1 - 2**-epoch - random.random() / epoch - offset
-        loss = 2**-epoch + random.random() / epoch + offset
-        trackio.log({"acc": acc, "loss": loss})
-```
-
 Trackio is designed to be lightweight (<500 lines of code total), not fully-featured. It is designed in a modular way so that developers can easily fork the repository and add functionality that they care about.
 
 ## Data Storage
