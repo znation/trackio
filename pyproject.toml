@@ -32,6 +32,9 @@ dev = [
     "ruff==0.9.3"
 ]
 
+[project.scripts]
+trackio = "trackio.cli:main"
+
 [tool.hatch.build.targets.wheel]
 packages = ["trackio"]
 

@@ -1,5 +1,7 @@
 import os
 import random
+import sys
+import time
 
 from huggingface_hub.constants import HF_HOME
 
@@ -199,3 +201,14 @@ def generate_readable_name():
     noun = random.choice(nouns)
     number = random.randint(1, 99)
     return f"{adjective}-{noun}-{number}"
+
+
+def block_except_in_notebook():
+    in_notebook = bool(getattr(sys, "ps1", sys.flags.interactive))
+    if in_notebook:
+        return
+    try:
+        while True:
+            time.sleep(0.1)
+    except (KeyboardInterrupt, OSError):
+        print("Keyboard interruption in main thread... closing dashboard.")
