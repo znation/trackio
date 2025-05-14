@@ -12,6 +12,7 @@ readme = "README.md"
 requires-python = ">3.9"
 dependencies = [
     "pandas",
+    "huggingface-hub",
     "gradio",
 ]
 classifiers = [
