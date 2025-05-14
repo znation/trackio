@@ -13,5 +13,6 @@ def test_run_log_calls_client():
     run = Run(project="proj", client=client, name="run1")
     metrics = {"x": 1}
     run.log(metrics)
-    client.predict.assert_called_once_with(api_name="/log", project="proj", run="run1", metrics=metrics)
-
+    client.predict.assert_called_once_with(
+        api_name="/log", project="proj", run="run1", metrics=metrics
+    )

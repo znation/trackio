@@ -19,7 +19,10 @@ def test_init_creates_tables_and_config(temp_db):
     assert os.path.exists(storage.db_path)
     with sqlite3.connect(storage.db_path) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT config FROM configs WHERE project_name=? AND run_name=?", ("proj1", "run1"))
+        cursor.execute(
+            "SELECT config FROM configs WHERE project_name=? AND run_name=?",
+            ("proj1", "run1"),
+        )
         row = cursor.fetchone()
         assert row is not None
         assert "foo" in row[0]
@@ -51,4 +54,4 @@ def test_get_projects_and_runs(temp_db):
     projects = set(storage.get_projects())
     assert {"proj1", "proj2"}.issubset(projects)
     runs = set(storage.get_runs("proj1"))
-    assert "run1" in runs 
+    assert "run1" in runs
