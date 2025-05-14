@@ -62,7 +62,7 @@ def finish():
 
 def show(project: str | None = None):
     _, url, share_url = demo.launch(
-        show_api=False, quiet=True, prevent_thread_lock=True
+        show_api=False, quiet=True, inline=False, prevent_thread_lock=True
     )
     base_url = share_url + "/" if share_url else url
     dashboard_url = base_url + f"?project={project}" if project else base_url
