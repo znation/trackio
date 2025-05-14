@@ -11,14 +11,16 @@ def get_projects(request: gr.Request):
     storage = SQLiteStorage("", "", {})
     projects = storage.get_projects()
     if project := request.query_params.get("project"):
-        pass
+        interactive = False
     else:
+        interactive = True
         project = projects[0] if projects else None
     return gr.Dropdown(
         label="Project",
         choices=projects,
         value=project,
         allow_custom_value=True,
+        interactive=interactive,
     )
 
 
@@ -63,7 +65,7 @@ def log(project: str, run: str, metrics: dict[str, Any]) -> None:
 
 
 with gr.Blocks(theme="citrus") as demo:
-    with gr.Sidebar():
+    with gr.Sidebar() as sidebar:
         gr.Markdown("# 🎯 Trackio Dashboard")
         project_dd = gr.Dropdown(label="Project", allow_custom_value=True)
         gr.Markdown("### ⚙️ Settings")
