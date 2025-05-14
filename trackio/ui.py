@@ -124,5 +124,6 @@ with gr.Blocks(theme="citrus") as demo:
                 title=col,
             )
 
+
 if __name__ == "__main__":
     demo.launch()

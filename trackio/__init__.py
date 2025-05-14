@@ -25,14 +25,18 @@ config = {}
 
 def init(project: str, name: str | None = None, config: dict | None = None) -> Run:
     if not current_server.get():
-        url = demo.launch(show_api=False, inline=False, quiet=True, prevent_thread_lock=True)
+        url = demo.launch(
+            show_api=False, inline=False, quiet=True, prevent_thread_lock=True
+        )
         current_server.set(url)
     else:
         url = current_server.get()
     if current_project.get() is None or current_project.get() != project:
         print(f"* Trackio project initialized: {project}")
         print(f"* Trackio metrics logged to: {TRACKIO_DIR}")
-        print(f"* View dashboard by running: trackio ui --project \"{project}\" in your command line or trackio.show(project=\"{project}\") in Python")
+        print(
+            f'* View dashboard by running: trackio ui --project "{project}" in your command line or trackio.show(project="{project}") in Python'
+        )
 
     current_project.set(project)
     client = Client(url, verbose=False)
