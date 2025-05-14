@@ -36,7 +36,7 @@ def init(project: str, name: str | None = None, config: dict | None = None) -> R
         print(f"* Trackio project initialized: {project}")
         print(f"* Trackio metrics logged to: {TRACKIO_DIR}")
         print(
-            f'* View dashboard by running in your terminal: trackio show --project "{project}"'
+            f'\n* View dashboard by running in your terminal: trackio show --project "{project}"'
         )
         print(
             f'* or by running in your Python interpreter: trackio.show(project="{project}")'

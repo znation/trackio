@@ -65,7 +65,7 @@ def log(project: str, run: str, metrics: dict[str, Any]) -> None:
 with gr.Blocks(theme="citrus") as demo:
     with gr.Sidebar():
         gr.Markdown("# 🎯 Trackio Dashboard")
-        project_dd = gr.Dropdown(label="Project")
+        project_dd = gr.Dropdown(label="Project", allow_custom_value=True)
         gr.Markdown("### ⚙️ Settings")
         realtime_cb = gr.Checkbox(label="Refresh realtime", value=True)
     with gr.Row():
