@@ -31,7 +31,7 @@ def get_runs(project):
     return storage.get_runs(project)
 
 
-def load_run_data(project, run):
+def load_run_data(project: str | None, run: str | None, smoothing: bool):
     if not project or not run:
         return None
     storage = SQLiteStorage("", "", {})
@@ -41,6 +41,10 @@ def load_run_data(project, run):
     df = pd.DataFrame(metrics)
     if "step" not in df.columns:
         df["step"] = range(len(df))
+    if smoothing:
+        numeric_cols = df.select_dtypes(include="number").columns
+        numeric_cols = [c for c in numeric_cols if c not in RESERVED_KEYS]
+        df[numeric_cols] = df[numeric_cols].ewm(alpha=0.1).mean()
     return df
 
 
@@ -70,6 +74,7 @@ with gr.Blocks(theme="citrus") as demo:
         project_dd = gr.Dropdown(label="Project", allow_custom_value=True)
         gr.Markdown("### ⚙️ Settings")
         realtime_cb = gr.Checkbox(label="Refresh realtime", value=True)
+        smoothing_cb = gr.Checkbox(label="Smoothing", value=True)
     with gr.Row():
         run_dd = gr.Dropdown(label="Run", choices=[], multiselect=True)
 
@@ -102,12 +107,12 @@ with gr.Blocks(theme="citrus") as demo:
 
     @gr.render(
         triggers=[run_dd.change, timer.tick],
-        inputs=[project_dd, run_dd],
+        inputs=[project_dd, run_dd, smoothing_cb],
     )
-    def update_dashboard(project, runs):
+    def update_dashboard(project, runs, smoothing):
         dfs = []
         for run in runs:
-            df = load_run_data(project, run)
+            df = load_run_data(project, run, smoothing)
             if df is not None:
                 df["run"] = run
                 dfs.append(df)
