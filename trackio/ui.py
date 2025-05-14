@@ -125,10 +125,5 @@ with gr.Blocks(theme="citrus") as demo:
             )
 
 
-def launch_gradio(**kwargs) -> str:
-    _, url, _ = demo.launch(**kwargs)
-    return url
-
-
 if __name__ == "__main__":
-    launch_gradio()
+    demo.launch()
