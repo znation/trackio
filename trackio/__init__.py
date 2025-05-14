@@ -32,7 +32,7 @@ def init(project: str, name: str | None = None, config: dict | None = None) -> R
     if current_project.get() is None or current_project.get() != project:
         print(f"* Trackio project initialized: {project}")
         print(f"* Trackio metrics logged to: {TRACKIO_DIR}")
-        print(f"* View dashboard by running: trackio show --project {project}")
+        print(f"* View dashboard by running: trackio ui --project \"{project}\" in your command line or trackio.show(project=\"{project}\") in Python")
 
     current_project.set(project)
     client = Client(url, verbose=False)
@@ -42,7 +42,7 @@ def init(project: str, name: str | None = None, config: dict | None = None) -> R
     return run
 
 
-def log(metrics):
+def log(metrics: dict) -> None:
     if current_run.get() is None:
         raise RuntimeError("Call trackio.init() before log().")
     current_run.get().log(metrics)
@@ -52,3 +52,8 @@ def finish():
     if current_run.get() is None:
         raise RuntimeError("Call trackio.init() before finish().")
     current_run.get().finish()
+
+
+def show(project: str | None = None):
+    _, url, _ = demo.launch(show_api=False, quiet=True, inbrowser=True)
+    print(f"* Trackio UI launched at: {url}?project={project}")
