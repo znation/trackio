@@ -39,12 +39,12 @@ def load_run_data(project: str | None, run: str | None, smoothing: bool):
     if not metrics:
         return None
     df = pd.DataFrame(metrics)
-    if "step" not in df.columns:
-        df["step"] = range(len(df))
     if smoothing:
         numeric_cols = df.select_dtypes(include="number").columns
         numeric_cols = [c for c in numeric_cols if c not in RESERVED_KEYS]
         df[numeric_cols] = df[numeric_cols].ewm(alpha=0.1).mean()
+    if "step" not in df.columns:
+        df["step"] = range(len(df))
     return df
 
 
@@ -68,7 +68,7 @@ def log(project: str, run: str, metrics: dict[str, Any]) -> None:
     storage.log(metrics)
 
 
-with gr.Blocks(theme="citrus") as demo:
+with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
     with gr.Sidebar() as sidebar:
         gr.Markdown("# 🎯 Trackio Dashboard")
         project_dd = gr.Dropdown(label="Project", allow_custom_value=True)
@@ -106,7 +106,7 @@ with gr.Blocks(theme="citrus") as demo:
     )
 
     @gr.render(
-        triggers=[run_dd.change, timer.tick],
+        triggers=[run_dd.change, timer.tick, smoothing_cb.change],
         inputs=[project_dd, run_dd, smoothing_cb],
     )
     def update_dashboard(project, runs, smoothing):
