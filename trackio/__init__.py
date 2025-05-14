@@ -35,8 +35,12 @@ def init(project: str, name: str | None = None, config: dict | None = None) -> R
     if current_project.get() is None or current_project.get() != project:
         print(f"* Trackio project initialized: {project}")
         print(f"* Trackio metrics logged to: {TRACKIO_DIR}")
-        print(f'* View dashboard by running in your terminal: trackio show --project "{project}"')
-        print(f'* or by running in your Python interpreter: trackio.show(project="{project}")')
+        print(
+            f'* View dashboard by running in your terminal: trackio show --project "{project}"'
+        )
+        print(
+            f'* or by running in your Python interpreter: trackio.show(project="{project}")'
+        )
 
     current_project.set(project)
     client = Client(url, verbose=False)
@@ -59,11 +63,22 @@ def finish():
 
 
 def show(project: str | None = None):
-    _, url, share_url = demo.launch(show_api=False, quiet=True, prevent_thread_lock=True)
+    _, url, share_url = demo.launch(
+        show_api=False, quiet=True, prevent_thread_lock=True
+    )
     base_url = share_url + "/" if share_url else url
     dashboard_url = base_url + f"?project={project}" if project else base_url
     print(f"* Trackio UI launched at: {dashboard_url}")
     webbrowser.open(dashboard_url)
     block_except_in_notebook()
-    
 
+
+def show_dashboard(project: str | None = None):
+    _, url, share_url = demo.launch(
+        show_api=False, quiet=True, prevent_thread_lock=True
+    )
+    base_url = share_url + "/" if share_url else url
+    dashboard_url = base_url + f"?project={project}" if project else base_url
+    print(f"* Trackio UI launched at: {dashboard_url}")
+    webbrowser.open(dashboard_url)
+    block_except_in_notebook()
