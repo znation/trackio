@@ -69,14 +69,3 @@ def show(project: str | None = None):
     print(f"* Trackio UI launched at: {dashboard_url}")
     webbrowser.open(dashboard_url)
     block_except_in_notebook()
-
-
-def show_dashboard(project: str | None = None):
-    _, url, share_url = demo.launch(
-        show_api=False, quiet=True, prevent_thread_lock=True
-    )
-    base_url = share_url + "/" if share_url else url
-    dashboard_url = base_url + f"?project={project}" if project else base_url
-    print(f"* Trackio UI launched at: {dashboard_url}")
-    webbrowser.open(dashboard_url)
-    block_except_in_notebook()
