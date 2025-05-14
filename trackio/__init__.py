@@ -38,9 +38,7 @@ def init(project: str, name: str | None = None, config: dict | None = None) -> R
         print(
             f'\n* View dashboard by running in your terminal: trackio show --project "{project}"'
         )
-        print(
-            f'* or by running in Python: trackio.show(project="{project}")'
-        )
+        print(f'* or by running in Python: trackio.show(project="{project}")')
 
     current_project.set(project)
     client = Client(url, verbose=False)
