@@ -33,7 +33,7 @@ dev = [
 ]
 
 [project.scripts]
-trackio = "trackio.__main__:main"
+trackio = "trackio.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["trackio"]

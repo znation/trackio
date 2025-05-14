@@ -1,11 +1,12 @@
 import contextvars
+import webbrowser
 from pathlib import Path
 
 from gradio_client import Client
 
 from trackio.run import Run
 from trackio.ui import demo
-from trackio.utils import TRACKIO_DIR
+from trackio.utils import TRACKIO_DIR, block_except_in_notebook
 
 __version__ = Path(__file__).parent.joinpath("version.txt").read_text().strip()
 
@@ -25,7 +26,7 @@ config = {}
 
 def init(project: str, name: str | None = None, config: dict | None = None) -> Run:
     if not current_server.get():
-        url = demo.launch(
+        _, url, _ = demo.launch(
             show_api=False, inline=False, quiet=True, prevent_thread_lock=True
         )
         current_server.set(url)
@@ -34,9 +35,8 @@ def init(project: str, name: str | None = None, config: dict | None = None) -> R
     if current_project.get() is None or current_project.get() != project:
         print(f"* Trackio project initialized: {project}")
         print(f"* Trackio metrics logged to: {TRACKIO_DIR}")
-        print(
-            f'* View dashboard by running: trackio ui --project "{project}" in your command line or trackio.show(project="{project}") in Python'
-        )
+        print(f'* View dashboard by running in your terminal: trackio show --project "{project}"')
+        print(f'* or by running in your Python interpreter: trackio.show(project="{project}")')
 
     current_project.set(project)
     client = Client(url, verbose=False)
@@ -59,5 +59,11 @@ def finish():
 
 
 def show(project: str | None = None):
-    _, url, _ = demo.launch(show_api=False, quiet=True, inbrowser=True)
-    print(f"* Trackio UI launched at: {url}?project={project}")
+    _, url, share_url = demo.launch(show_api=False, quiet=True, prevent_thread_lock=True)
+    base_url = share_url + "/" if share_url else url
+    dashboard_url = base_url + f"?project={project}" if project else base_url
+    print(f"* Trackio UI launched at: {dashboard_url}")
+    webbrowser.open(dashboard_url)
+    block_except_in_notebook()
+    
+
