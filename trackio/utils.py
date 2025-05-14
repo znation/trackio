@@ -1,7 +1,10 @@
+import os
 import random
 
+from huggingface_hub.constants import HF_HOME
+
 RESERVED_KEYS = ["project", "run", "timestamp"]
-TRACKIO_DIR = ".trackio"
+TRACKIO_DIR = os.path.join(HF_HOME, "trackio")
 
 
 def generate_readable_name():
