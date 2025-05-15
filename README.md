@@ -1,5 +1,7 @@
 <p align="center">
-<div style='display: flex; align-items: center; gap: 8px;'><img src='https://github.com/gradio-app/trackio/blob/main/trackio/trackio_logo.png?raw=true' width='32' height='32'><span style='font-size: 2em; font-weight: bold;'>Trackio</span></div>
+<h1>
+<div style='display: flex; align-items: center; gap: 8px;'><img src='https://github.com/gradio-app/trackio/blob/main/trackio/trackio_logo.png?raw=true' width='64' height='64'><span style='font-size: 2em; font-weight: bold;'>Trackio</span></div>
+</h1>
 </p>
 
 `trackio` is a lightweight alternative for `wandb` that uses Hugging Face Datasets for experiment logging and Gradio / Spaces for visualization.
