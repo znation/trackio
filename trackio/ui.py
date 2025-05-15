@@ -64,6 +64,13 @@ def log(project: str, run: str, metrics: dict[str, Any]) -> None:
     storage.log(metrics)
 
 
+def configure(request: gr.Request):
+    if metrics := request.query_params.get("metrics"):
+        return metrics.split(",")
+    else:
+        return []
+
+
 with gr.Blocks(theme="citrus") as demo:
     with gr.Sidebar() as sidebar:
         gr.Markdown(
@@ -76,7 +83,13 @@ with gr.Blocks(theme="citrus") as demo:
         run_dd = gr.Dropdown(label="Run", choices=[], multiselect=True)
 
     timer = gr.Timer(value=1)
+    metrics_subset = gr.State([])
 
+    gr.on(
+        [demo.load],
+        fn=configure,
+        outputs=metrics_subset,
+    )
     gr.on(
         [demo.load, timer.tick],
         fn=get_projects,
@@ -104,9 +117,9 @@ with gr.Blocks(theme="citrus") as demo:
 
     @gr.render(
         triggers=[run_dd.change, timer.tick],
-        inputs=[project_dd, run_dd],
+        inputs=[project_dd, run_dd, metrics_subset],
     )
-    def update_dashboard(project, runs):
+    def update_dashboard(project, runs, metrics_subset):
         dfs = []
         for run in runs:
             df = load_run_data(project, run)
@@ -119,6 +132,8 @@ with gr.Blocks(theme="citrus") as demo:
             master_df = pd.DataFrame()
         numeric_cols = master_df.select_dtypes(include="number").columns
         numeric_cols = [c for c in numeric_cols if c not in RESERVED_KEYS]
+        if metrics_subset:
+            numeric_cols = [c for c in numeric_cols if c in metrics_subset]
         for col in numeric_cols:
             gr.LinePlot(
                 master_df,
