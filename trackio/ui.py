@@ -134,14 +134,23 @@ with gr.Blocks(theme="citrus") as demo:
         numeric_cols = [c for c in numeric_cols if c not in RESERVED_KEYS]
         if metrics_subset:
             numeric_cols = [c for c in numeric_cols if c in metrics_subset]
-        for col in numeric_cols:
-            gr.LinePlot(
-                master_df,
-                x="step",
-                y=col,
-                color="run" if "run" in master_df.columns else None,
-                title=col,
-            )
+        for col in range(len(numeric_cols) // 2):
+            with gr.Row():
+                gr.LinePlot(
+                    master_df,
+                    x="step",
+                    y=numeric_cols[2 * col],
+                    color="run" if "run" in master_df.columns else None,
+                    title=numeric_cols[2 * col],
+                )
+                if 2 * col + 1 < len(numeric_cols):
+                    gr.LinePlot(
+                        master_df,
+                        x="step",
+                        y=numeric_cols[2 * col + 1],
+                        color="run" if "run" in master_df.columns else None,
+                        title=numeric_cols[2 * col + 1],
+                    )
 
 
 if __name__ == "__main__":
