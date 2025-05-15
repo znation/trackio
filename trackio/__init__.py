@@ -6,7 +6,7 @@ from gradio_client import Client
 
 from trackio.run import Run
 from trackio.ui import demo
-from trackio.utils import TRACKIO_DIR, block_except_in_notebook
+from trackio.utils import TRACKIO_DIR, TRACKIO_LOGO_PATH, block_except_in_notebook
 
 __version__ = Path(__file__).parent.joinpath("version.txt").read_text().strip()
 
@@ -62,7 +62,12 @@ def finish():
 
 def show(project: str | None = None):
     _, url, share_url = demo.launch(
-        show_api=False, quiet=True, inline=False, prevent_thread_lock=True
+        show_api=False,
+        quiet=True,
+        inline=False,
+        prevent_thread_lock=True,
+        favicon_path=TRACKIO_LOGO_PATH,
+        allowed_paths=[TRACKIO_LOGO_PATH],
     )
     base_url = share_url + "/" if share_url else url
     dashboard_url = base_url + f"?project={project}" if project else base_url
