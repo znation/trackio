@@ -2,11 +2,14 @@ import os
 import random
 import sys
 import time
+from pathlib import Path
 
 from huggingface_hub.constants import HF_HOME
 
 RESERVED_KEYS = ["project", "run", "timestamp"]
 TRACKIO_DIR = os.path.join(HF_HOME, "trackio")
+
+TRACKIO_LOGO_PATH = str(Path(__file__).parent.joinpath("trackio_logo.png"))
 
 
 def generate_readable_name():

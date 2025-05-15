@@ -4,7 +4,7 @@ import gradio as gr
 import pandas as pd
 
 from trackio.sqlite_storage import SQLiteStorage
-from trackio.utils import RESERVED_KEYS
+from trackio.utils import RESERVED_KEYS, TRACKIO_LOGO_PATH
 
 
 def get_projects(request: gr.Request):
@@ -66,7 +66,9 @@ def log(project: str, run: str, metrics: dict[str, Any]) -> None:
 
 with gr.Blocks(theme="citrus") as demo:
     with gr.Sidebar() as sidebar:
-        gr.Markdown("# 🎯 Trackio Dashboard")
+        gr.Markdown(
+            f"<div style='display: flex; align-items: center; gap: 8px;'><img src='/gradio_api/file={TRACKIO_LOGO_PATH}' width='32' height='32'><span style='font-size: 2em; font-weight: bold;'>Trackio</span></div>"
+        )
         project_dd = gr.Dropdown(label="Project", allow_custom_value=True)
         gr.Markdown("### ⚙️ Settings")
         realtime_cb = gr.Checkbox(label="Refresh realtime", value=True)
@@ -128,4 +130,4 @@ with gr.Blocks(theme="citrus") as demo:
 
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(allowed_paths=[TRACKIO_LOGO_PATH])

@@ -1,5 +1,5 @@
 <p align="center">
-<h1><center> 🎯 Trackio</center></h1>
+<div style='display: flex; align-items: center; gap: 8px;'><img src='' width='32' height='32'><span style='font-size: 2em; font-weight: bold;'>Trackio</span></div>
 </p>
 
 `trackio` is a lightweight alternative for `wandb` that uses Hugging Face Datasets for experiment logging and Gradio / Spaces for visualization.
