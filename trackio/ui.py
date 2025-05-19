@@ -120,11 +120,16 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
         api_name="log",
     )
 
+    x_lim = gr.State(None)
+
+    def update_x_lim(select_data: gr.SelectData):
+        return select_data.index
+
     @gr.render(
-        triggers=[run_dd.change, timer.tick, smoothing_cb.change],
-        inputs=[project_dd, run_dd, smoothing_cb, metrics_subset],
+        triggers=[demo.load, run_dd.change, timer.tick, smoothing_cb.change, x_lim.change],
+        inputs=[project_dd, run_dd, smoothing_cb, metrics_subset, x_lim],
     )
-    def update_dashboard(project, runs, smoothing, metrics_subset):
+    def update_dashboard(project, runs, smoothing, metrics_subset, x_lim_value):
         dfs = []
         for run in runs:
             df = load_run_data(project, run, smoothing)
@@ -139,23 +144,36 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
         numeric_cols = [c for c in numeric_cols if c not in RESERVED_KEYS]
         if metrics_subset:
             numeric_cols = [c for c in numeric_cols if c in metrics_subset]
+        plots: list[gr.LinePlot] = []
         for col in range(len(numeric_cols) // 2):
-            with gr.Row():
-                gr.LinePlot(
+            with gr.Row(key=f"row-{col}"):
+                plot = gr.LinePlot(
                     master_df,
                     x="step",
                     y=numeric_cols[2 * col],
                     color="run" if "run" in master_df.columns else None,
                     title=numeric_cols[2 * col],
+                    key=f"plot-{col}-0",
+                    preserved_by_key=None,
+                    x_lim=x_lim_value,
                 )
+                plots.append(plot)
                 if 2 * col + 1 < len(numeric_cols):
-                    gr.LinePlot(
+                    plot = gr.LinePlot(
                         master_df,
                         x="step",
                         y=numeric_cols[2 * col + 1],
                         color="run" if "run" in master_df.columns else None,
                         title=numeric_cols[2 * col + 1],
+                        key=f"plot-{col}-1",
+                        preserved_by_key=None,
+                        x_lim=x_lim_value,
                     )
+                    plots.append(plot)
+            
+        for plot in plots:
+            plot.select(update_x_lim, outputs=x_lim)
+            plot.double_click(lambda: None, outputs=x_lim)
 
 
 if __name__ == "__main__":
