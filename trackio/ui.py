@@ -126,7 +126,13 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
         return select_data.index
 
     @gr.render(
-        triggers=[demo.load, run_dd.change, timer.tick, smoothing_cb.change, x_lim.change],
+        triggers=[
+            demo.load,
+            run_dd.change,
+            timer.tick,
+            smoothing_cb.change,
+            x_lim.change,
+        ],
         inputs=[project_dd, run_dd, smoothing_cb, metrics_subset, x_lim],
     )
     def update_dashboard(project, runs, smoothing, metrics_subset, x_lim_value):
@@ -170,7 +176,7 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
                         x_lim=x_lim_value,
                     )
                     plots.append(plot)
-            
+
         for plot in plots:
             plot.select(update_x_lim, outputs=x_lim)
             plot.double_click(lambda: None, outputs=x_lim)
