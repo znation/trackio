@@ -7,6 +7,7 @@ try:
 except:
     from utils import RESERVED_KEYS, TRACKIO_DIR
 
+
 class SQLiteStorage:
     def __init__(self, project: str, name: str, config: dict):
         self.project = project

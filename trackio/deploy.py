@@ -32,7 +32,7 @@ def deploy_as_space(title: str):
         repo_type="space",
         exist_ok=True,
     ).repo_id
-    assert(space_id == title) # not sure why these would differ
+    assert space_id == title  # not sure why these would differ
 
     hf_api.upload_folder(
         repo_id=space_id,

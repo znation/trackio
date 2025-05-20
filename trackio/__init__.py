@@ -28,7 +28,9 @@ current_server: contextvars.ContextVar[str | None] = contextvars.ContextVar(
 config = {}
 
 
-def init(project: str, name: str | None = None, space_id=None, config: dict | None = None) -> Run:
+def init(
+    project: str, name: str | None = None, space_id=None, config: dict | None = None
+) -> Run:
     if not current_server.get():
         if space_id is None:
             _, url, _ = demo.launch(
@@ -75,7 +77,9 @@ def init(project: str, name: str | None = None, space_id=None, config: dict | No
             )
             print(f'* or by running in Python: trackio.show(project="{project}")')
         else:
-            print(f"* Trackio metrics logged to: https://huggingface.co/spaces/{space_id}")
+            print(
+                f"* Trackio metrics logged to: https://huggingface.co/spaces/{space_id}"
+            )
     current_project.set(project)
 
     run = Run(project=project, client=client, name=name, config=config)

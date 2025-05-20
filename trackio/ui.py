@@ -179,5 +179,6 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
             plot.select(update_x_lim, outputs=x_lim)
             plot.double_click(lambda: None, outputs=x_lim)
 
+
 if __name__ == "__main__":
     demo.launch(allowed_paths=[TRACKIO_LOGO_PATH])
