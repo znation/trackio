@@ -6,7 +6,7 @@ import pandas as pd
 try:
     from trackio.sqlite_storage import SQLiteStorage
     from trackio.utils import RESERVED_KEYS, TRACKIO_LOGO_PATH
-except:
+except:  # noqa: E722
     from sqlite_storage import SQLiteStorage
     from utils import RESERVED_KEYS, TRACKIO_LOGO_PATH
 

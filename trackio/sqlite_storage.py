@@ -4,7 +4,7 @@ import sqlite3
 
 try:
     from trackio.utils import RESERVED_KEYS, TRACKIO_DIR
-except:
+except:  # noqa: E722
     from utils import RESERVED_KEYS, TRACKIO_DIR
 
 
