@@ -163,11 +163,14 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
                         key=f"plot-{col}-{i}",
                         preserved_by_key=None,
                         x_lim=x_lim_value,
-                        y_lim=[min(master_df[numeric_cols[2 * col + i]]), max(master_df[numeric_cols[2 * col + i]])],
+                        y_lim=[
+                            min(master_df[numeric_cols[2 * col + i]]),
+                            max(master_df[numeric_cols[2 * col + i]]),
+                        ],
                         show_fullscreen_button=True,
                     )
                     plots.append(plot)
-    
+
         for plot in plots:
             plot.select(update_x_lim, outputs=x_lim)
             plot.double_click(lambda: None, outputs=x_lim)
