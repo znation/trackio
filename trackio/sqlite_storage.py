@@ -2,8 +2,10 @@ import json
 import os
 import sqlite3
 
-from trackio.utils import RESERVED_KEYS, TRACKIO_DIR
-
+try:
+    from trackio.utils import RESERVED_KEYS, TRACKIO_DIR
+except:
+    from utils import RESERVED_KEYS, TRACKIO_DIR
 
 class SQLiteStorage:
     def __init__(self, project: str, name: str, config: dict):

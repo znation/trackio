@@ -3,8 +3,12 @@ from typing import Any
 import gradio as gr
 import pandas as pd
 
-from trackio.sqlite_storage import SQLiteStorage
-from trackio.utils import RESERVED_KEYS, TRACKIO_LOGO_PATH
+try:
+    from trackio.sqlite_storage import SQLiteStorage
+    from trackio.utils import RESERVED_KEYS, TRACKIO_LOGO_PATH
+except:
+    from sqlite_storage import SQLiteStorage
+    from utils import RESERVED_KEYS, TRACKIO_LOGO_PATH
 
 
 def get_projects(request: gr.Request):
@@ -174,7 +178,6 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
         for plot in plots:
             plot.select(update_x_lim, outputs=x_lim)
             plot.double_click(lambda: None, outputs=x_lim)
-
 
 if __name__ == "__main__":
     demo.launch(allowed_paths=[TRACKIO_LOGO_PATH])

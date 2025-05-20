@@ -1,9 +1,13 @@
 import contextvars
 import webbrowser
 from pathlib import Path
+import time
 
 from gradio_client import Client
+from huggingface_hub.errors import RepositoryNotFoundError
+from httpx import ReadTimeout
 
+from trackio.deploy import deploy_as_space
 from trackio.run import Run
 from trackio.ui import demo
 from trackio.utils import TRACKIO_DIR, TRACKIO_LOGO_PATH, block_except_in_notebook
@@ -24,11 +28,14 @@ current_server: contextvars.ContextVar[str | None] = contextvars.ContextVar(
 config = {}
 
 
-def init(project: str, name: str | None = None, config: dict | None = None) -> Run:
+def init(project: str, name: str | None = None, space_id=None, config: dict | None = None) -> Run:
     if not current_server.get():
-        _, url, _ = demo.launch(
-            show_api=False, inline=False, quiet=True, prevent_thread_lock=True
-        )
+        if space_id is None:
+            _, url, _ = demo.launch(
+                show_api=False, inline=False, quiet=True, prevent_thread_lock=True
+            )
+        else:
+            url = space_id
         current_server.set(url)
     else:
         url = current_server.get()
@@ -41,7 +48,31 @@ def init(project: str, name: str | None = None, config: dict | None = None) -> R
         print(f'* or by running in Python: trackio.show(project="{project}")')
 
     current_project.set(project)
-    client = Client(url, verbose=False)
+    client = None
+    try:
+        client = Client(url, verbose=False)
+    except RepositoryNotFoundError as e:
+        # if we're passed a space_id, ignore the error here, otherwise re-raise it
+        if space_id is None:
+            raise e
+    if client is None and space_id is not None:
+        # try to create the space on demand
+        deploy_as_space(space_id)
+        # try to wait until the Client can initialize
+        max_attempts = 30
+        attempts = 0
+        while client is None:
+            try:
+                client = Client(space_id, verbose=False)
+            except ReadTimeout:
+                print("Space is not yet ready. Waiting 5 seconds...")
+                time.sleep(5)
+            except ValueError as e:
+                print(f"Space gave error {e}. Trying again in 5 seconds...")
+                time.sleep(5)
+            attempts += 1
+            if attempts >= max_attempts:
+                break
     run = Run(project=project, client=client, name=name, config=config)
     current_run.set(run)
     globals()["config"] = run.config
