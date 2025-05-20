@@ -39,15 +39,7 @@ def init(project: str, name: str | None = None, space_id=None, config: dict | No
         current_server.set(url)
     else:
         url = current_server.get()
-    if current_project.get() is None or current_project.get() != project:
-        print(f"* Trackio project initialized: {project}")
-        print(f"* Trackio metrics logged to: {TRACKIO_DIR}")
-        print(
-            f'\n* View dashboard by running in your terminal: trackio show --project "{project}"'
-        )
-        print(f'* or by running in Python: trackio.show(project="{project}")')
 
-    current_project.set(project)
     client = None
     try:
         client = Client(url, verbose=False)
@@ -73,6 +65,19 @@ def init(project: str, name: str | None = None, space_id=None, config: dict | No
             attempts += 1
             if attempts >= max_attempts:
                 break
+
+    if current_project.get() is None or current_project.get() != project:
+        print(f"* Trackio project initialized: {project}")
+        if space_id is None:
+            print(f"* Trackio metrics logged to: {TRACKIO_DIR}")
+            print(
+                f'\n* View dashboard by running in your terminal: trackio show --project "{project}"'
+            )
+            print(f'* or by running in Python: trackio.show(project="{project}")')
+        else:
+            print(f"* Trackio metrics logged to: https://huggingface.co/spaces/{space_id}")
+    current_project.set(project)
+
     run = Run(project=project, client=client, name=name, config=config)
     current_run.set(run)
     globals()["config"] = run.config
