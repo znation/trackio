@@ -1,5 +1,5 @@
 ---
 sdk: gradio
-sdk_version: 5.30.0
+sdk_version: GRADIO_VERSION
 app_file: ui.py
 ---
