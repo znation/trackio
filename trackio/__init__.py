@@ -5,6 +5,7 @@ from pathlib import Path
 
 from gradio_client import Client
 from httpx import ReadTimeout
+import huggingface_hub
 from huggingface_hub.errors import RepositoryNotFoundError
 
 from trackio.deploy import deploy_as_space
@@ -26,7 +27,7 @@ current_server: contextvars.ContextVar[str | None] = contextvars.ContextVar(
 )
 
 config = {}
-
+SPACE_URL = "https://huggingface.co/spaces/{space_id}"
 
 def init(
     project: str,
@@ -43,45 +44,17 @@ def init(
         space_id: If provided, the project will be logged to a Hugging Face Space instead of a local directory. Should be a complete Space name like "username/reponame". If the Space does not exist, it will be created. If the Space already exists, the project will be logged to it.
         config: A dictionary of configuration options. Provided for compatibility with wandb.init()
     """
-    if not current_server.get():
-        if space_id is None:
-            _, url, _ = demo.launch(
-                show_api=False, inline=False, quiet=True, prevent_thread_lock=True
-            )
-        else:
-            url = space_id
+    if not current_server.get() and space_id is None:
+        _, url, _ = demo.launch(
+            show_api=False, inline=False, quiet=True, prevent_thread_lock=True
+        )
         current_server.set(url)
     else:
         url = current_server.get()
 
-    client = None
-    try:
-        client = Client(url, verbose=False)
-    except RepositoryNotFoundError as e:
-        # if we're passed a space_id, ignore the error here, otherwise re-raise it
-        if space_id is None:
-            raise e
-    if client is None and space_id is not None:
-        # try to create the space on demand
-        deploy_as_space(space_id)
-        # try to wait until the Client can initialize
-        max_attempts = 30
-        attempts = 0
-        while client is None:
-            try:
-                client = Client(space_id, verbose=False)
-            except ReadTimeout:
-                print("Space is not yet ready. Waiting 5 seconds...")
-                time.sleep(5)
-            except ValueError as e:
-                print(f"Space gave error {e}. Trying again in 5 seconds...")
-                time.sleep(5)
-            attempts += 1
-            if attempts >= max_attempts:
-                break
-
     if current_project.get() is None or current_project.get() != project:
         print(f"* Trackio project initialized: {project}")
+        
         if space_id is None:
             print(f"* Trackio metrics logged to: {TRACKIO_DIR}")
             print(
@@ -89,16 +62,51 @@ def init(
             )
             print(f'* or by running in Python: trackio.show(project="{project}")')
         else:
+            create_space_if_not_exists(space_id)
             print(
-                f"* Trackio metrics logged to: https://huggingface.co/spaces/{space_id}"
+                f"* View dashboard by going to: {SPACE_URL.format(space_id=space_id)}"
             )
     current_project.set(project)
 
+    space_or_url = space_id if space_id else url
+    client = Client(space_or_url, verbose=False)
     run = Run(project=project, client=client, name=name, config=config)
     current_run.set(run)
     globals()["config"] = run.config
     return run
 
+
+def create_space_if_not_exists(space_id: str) -> None:
+    """
+    Creates a new Hugging Face Space if it does not exist.
+
+    Args:
+        space_id: The ID of the Space to create.
+    """
+    if "/" not in space_id:
+        raise ValueError(f"Invalid space ID: {space_id}. Must be in the format: username/reponame.")
+    try:
+        huggingface_hub.repo_info(space_id, repo_type="space")
+        print(f"* Found existing space: {SPACE_URL.format(space_id=space_id)}")
+        return
+    except RepositoryNotFoundError:
+        pass
+
+    print(f"* Creating new space: {SPACE_URL.format(space_id=space_id)}")
+    deploy_as_space(space_id)
+
+    client = None
+    for _ in range(30):
+        try:
+            client = Client(space_id, verbose=False)
+            if client:
+                break
+        except ReadTimeout:
+            print("* Space is not yet ready. Waiting 5 seconds...")
+            time.sleep(5)
+        except ValueError as e:
+            print(f"* Space gave error {e}. Trying again in 5 seconds...")
+            time.sleep(5)
 
 def log(metrics: dict) -> None:
     """
