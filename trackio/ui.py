@@ -92,7 +92,7 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
             f"<div style='display: flex; align-items: center; gap: 8px;'><img src='/gradio_api/file={TRACKIO_LOGO_PATH}' width='32' height='32'><span style='font-size: 2em; font-weight: bold;'>Trackio</span></div>"
         )
         project_dd = gr.Dropdown(label="Project")
-        run_tb =gr.Textbox(label="Runs (99)", placeholder="Type to filter...")
+        run_tb = gr.Textbox(label="Runs (99)", placeholder="Type to filter...")
         run_cb = gr.CheckboxGroup(label="Runs", choices=[], interactive=True)
     with gr.Sidebar(position="right", open=False) as settings_sidebar:
         gr.Markdown("### ⚙️ Settings")
