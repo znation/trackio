@@ -48,15 +48,23 @@ def load_run_data(project: str | None, run: str | None, smoothing: bool):
     return df
 
 
-def update_runs(project, user_interacted_with_runs=False):
+def update_runs(project, filter_text, user_interacted_with_runs=False):
     if project is None:
         runs = []
     else:
         runs = get_runs(project)
+        if filter_text:
+            runs = [r for r in runs if filter_text in r]
     if not user_interacted_with_runs:
         return gr.CheckboxGroup(choices=runs, value=runs)
     else:
         return gr.CheckboxGroup(choices=runs)
+
+
+def filter_runs(project, filter_text):
+    runs = get_runs(project)
+    runs = [r for r in runs if filter_text in r]
+    return gr.CheckboxGroup(choices=runs, value=runs)
 
 
 def toggle_timer(cb_value):
@@ -84,7 +92,7 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
             f"<div style='display: flex; align-items: center; gap: 8px;'><img src='/gradio_api/file={TRACKIO_LOGO_PATH}' width='32' height='32'><span style='font-size: 2em; font-weight: bold;'>Trackio</span></div>"
         )
         project_dd = gr.Dropdown(label="Project")
-        gr.Textbox(label="Runs (99)", placeholder="Type to filter...")
+        run_tb =gr.Textbox(label="Runs (99)", placeholder="Type to filter...")
         run_cb = gr.CheckboxGroup(label="Runs", choices=[], interactive=True)
     with gr.Sidebar(position="right", open=False) as settings_sidebar:
         gr.Markdown("### ⚙️ Settings")
@@ -109,14 +117,14 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
     gr.on(
         [timer.tick],
         fn=update_runs,
-        inputs=[project_dd, user_interacted_with_run_cb],
+        inputs=[project_dd, run_tb, user_interacted_with_run_cb],
         outputs=run_cb,
         show_progress="hidden",
     )
     gr.on(
         [demo.load, project_dd.change],
         fn=update_runs,
-        inputs=[project_dd],
+        inputs=[project_dd, run_tb],
         outputs=run_cb,
         show_progress="hidden",
     )
@@ -130,6 +138,11 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
     run_cb.input(
         fn=lambda: True,
         outputs=user_interacted_with_run_cb,
+    )
+    run_tb.input(
+        fn=filter_runs,
+        inputs=[project_dd, run_tb],
+        outputs=run_cb,
     )
 
     gr.api(
