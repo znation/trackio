@@ -3,8 +3,12 @@ from typing import Any
 import gradio as gr
 import pandas as pd
 
-from trackio.sqlite_storage import SQLiteStorage
-from trackio.utils import RESERVED_KEYS, TRACKIO_LOGO_PATH
+try:
+    from trackio.sqlite_storage import SQLiteStorage
+    from trackio.utils import RESERVED_KEYS, TRACKIO_LOGO_PATH
+except:  # noqa: E722
+    from sqlite_storage import SQLiteStorage
+    from utils import RESERVED_KEYS, TRACKIO_LOGO_PATH
 
 
 def get_projects(request: gr.Request):
