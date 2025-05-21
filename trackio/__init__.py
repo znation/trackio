@@ -29,8 +29,20 @@ config = {}
 
 
 def init(
-    project: str, name: str | None = None, space_id=None, config: dict | None = None
+    project: str,
+    name: str | None = None,
+    space_id: str | None = None,
+    config: dict | None = None,
 ) -> Run:
+    """
+    Creates a new Trackio project and returns a Run object.
+
+    Args:
+        project: The name of the project (can be an existing project to continue tracking or a new project to start tracking from scratch).
+        name: The name of the run (if not provided, a default name will be generated).
+        space_id: If provided, the project will be logged to a Hugging Face Space instead of a local directory. Should be a complete Space name like "username/reponame". If the Space does not exist, it will be created. If the Space already exists, the project will be logged to it.
+        config: A dictionary of configuration options. Provided for compatibility with wandb.init()
+    """
     if not current_server.get():
         if space_id is None:
             _, url, _ = demo.launch(
@@ -89,18 +101,33 @@ def init(
 
 
 def log(metrics: dict) -> None:
+    """
+    Logs metrics to the current run.
+
+    Args:
+        metrics: A dictionary of metrics to log.
+    """
     if current_run.get() is None:
         raise RuntimeError("Call trackio.init() before log().")
     current_run.get().log(metrics)
 
 
 def finish():
+    """
+    Finishes the current run.
+    """
     if current_run.get() is None:
         raise RuntimeError("Call trackio.init() before finish().")
     current_run.get().finish()
 
 
 def show(project: str | None = None):
+    """
+    Launches the Trackio dashboard.
+
+    Args:
+        project: The name of the project whose runs to show. If not provided, all projects will be shown and the user can select one.
+    """
     _, url, share_url = demo.launch(
         show_api=False,
         quiet=True,
