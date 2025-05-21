@@ -3,9 +3,9 @@ import time
 import webbrowser
 from pathlib import Path
 
+import huggingface_hub
 from gradio_client import Client
 from httpx import ReadTimeout
-import huggingface_hub
 from huggingface_hub.errors import RepositoryNotFoundError
 
 from trackio.deploy import deploy_as_space
