@@ -3,8 +3,12 @@ from typing import Any
 import gradio as gr
 import pandas as pd
 
-from trackio.sqlite_storage import SQLiteStorage
-from trackio.utils import RESERVED_KEYS, TRACKIO_LOGO_PATH
+try:
+    from trackio.sqlite_storage import SQLiteStorage
+    from trackio.utils import RESERVED_KEYS, TRACKIO_LOGO_PATH
+except:  # noqa: E722
+    from sqlite_storage import SQLiteStorage
+    from utils import RESERVED_KEYS, TRACKIO_LOGO_PATH
 
 
 def get_projects(request: gr.Request):
@@ -183,27 +187,21 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
         plots: list[gr.LinePlot] = []
         for col in range(len(numeric_cols) // 2):
             with gr.Row(key=f"row-{col}"):
-                plot = gr.LinePlot(
-                    master_df,
-                    x="step",
-                    y=numeric_cols[2 * col],
-                    color="run" if "run" in master_df.columns else None,
-                    title=numeric_cols[2 * col],
-                    key=f"plot-{col}-0",
-                    preserved_by_key=None,
-                    x_lim=x_lim_value,
-                )
-                plots.append(plot)
-                if 2 * col + 1 < len(numeric_cols):
+                for i in range(2):
                     plot = gr.LinePlot(
                         master_df,
                         x="step",
-                        y=numeric_cols[2 * col + 1],
+                        y=numeric_cols[2 * col + i],
                         color="run" if "run" in master_df.columns else None,
-                        title=numeric_cols[2 * col + 1],
-                        key=f"plot-{col}-1",
+                        title=numeric_cols[2 * col + i],
+                        key=f"plot-{col}-{i}",
                         preserved_by_key=None,
                         x_lim=x_lim_value,
+                        y_lim=[
+                            min(master_df[numeric_cols[2 * col + i]]),
+                            max(master_df[numeric_cols[2 * col + i]]),
+                        ],
+                        show_fullscreen_button=True,
                     )
                     plots.append(plot)
 

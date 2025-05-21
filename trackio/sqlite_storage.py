@@ -2,7 +2,10 @@ import json
 import os
 import sqlite3
 
-from trackio.utils import RESERVED_KEYS, TRACKIO_DIR
+try:
+    from trackio.utils import RESERVED_KEYS, TRACKIO_DIR
+except:  # noqa: E722
+    from utils import RESERVED_KEYS, TRACKIO_DIR
 
 
 class SQLiteStorage:
