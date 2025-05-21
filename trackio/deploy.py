@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from importlib.resources import files
 import io
 import gradio
@@ -36,13 +37,7 @@ def deploy_as_space(title: str):
     ).repo_id
     assert space_id == title  # not sure why these would differ
 
-    hf_api.upload_folder(
-        repo_id=space_id,
-        repo_type="space",
-        folder_path=trackio_path,
-    )
-    
-    with open("README.md", "r") as f:
+    with open(Path(trackio_path, "README.md"), "r") as f:
         readme_content = f.read()
         readme_content = readme_content.replace("{GRADIO_VERSION}", gradio.__version__)
         readme_buffer = io.BytesIO(readme_content.encode("utf-8"))    
@@ -52,3 +47,11 @@ def deploy_as_space(title: str):
             repo_id=space_id,
             repo_type="space",
         )
+
+    huggingface_hub.disable_progress_bars()
+    hf_api.upload_folder(
+        repo_id=space_id,
+        repo_type="space",
+        folder_path=trackio_path,
+        ignore_patterns=["README.md"],
+    )
