@@ -29,6 +29,7 @@ current_server: contextvars.ContextVar[str | None] = contextvars.ContextVar(
 config = {}
 SPACE_URL = "https://huggingface.co/spaces/{space_id}"
 
+
 def init(
     project: str,
     name: str | None = None,
@@ -54,7 +55,7 @@ def init(
 
     if current_project.get() is None or current_project.get() != project:
         print(f"* Trackio project initialized: {project}")
-        
+
         if space_id is None:
             print(f"* Trackio metrics logged to: {TRACKIO_DIR}")
             print(
@@ -84,7 +85,9 @@ def create_space_if_not_exists(space_id: str) -> None:
         space_id: The ID of the Space to create.
     """
     if "/" not in space_id:
-        raise ValueError(f"Invalid space ID: {space_id}. Must be in the format: username/reponame.")
+        raise ValueError(
+            f"Invalid space ID: {space_id}. Must be in the format: username/reponame."
+        )
     try:
         huggingface_hub.repo_info(space_id, repo_type="space")
         print(f"* Found existing space: {SPACE_URL.format(space_id=space_id)}")
@@ -107,6 +110,7 @@ def create_space_if_not_exists(space_id: str) -> None:
         except ValueError as e:
             print(f"* Space gave error {e}. Trying again in 5 seconds...")
             time.sleep(5)
+
 
 def log(metrics: dict) -> None:
     """

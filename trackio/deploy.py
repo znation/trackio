@@ -1,9 +1,9 @@
-import os
-from pathlib import Path
-from importlib.resources import files
 import io
-import gradio
+import os
+from importlib.resources import files
+from pathlib import Path
 
+import gradio
 import huggingface_hub
 
 
@@ -40,7 +40,7 @@ def deploy_as_space(title: str):
     with open(Path(trackio_path, "README.md"), "r") as f:
         readme_content = f.read()
         readme_content = readme_content.replace("{GRADIO_VERSION}", gradio.__version__)
-        readme_buffer = io.BytesIO(readme_content.encode("utf-8"))    
+        readme_buffer = io.BytesIO(readme_content.encode("utf-8"))
         hf_api.upload_file(
             path_or_fileobj=readme_buffer,
             path_in_repo="README.md",
@@ -48,7 +48,7 @@ def deploy_as_space(title: str):
             repo_type="space",
         )
 
-    huggingface_hub.disable_progress_bars()
+    huggingface_hub.utils.disable_progress_bars()
     hf_api.upload_folder(
         repo_id=space_id,
         repo_type="space",
