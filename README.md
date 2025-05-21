@@ -8,7 +8,7 @@
 - **API compatible** with `wandb.init`, `wandb.log`, and `wandb.finish` (drop-in replacement: just use `trackio` instead of `wandb`)
 - Store logs in a Hugging Face Datasets-compatible format (Parquet)
 - Visualize experiments with a Gradio dashboard
-- *Local-first* design: dashboard runs locally by default. You can also host it on Spaces by changing a single parameter.
+- *Local-first* design: dashboard runs locally by default. You can also host it on Spaces by specifying a `space_id` parameter in `init`.
 - Everything here, including hosting on Spaces, is **free**!
 
 Trackio is designed to be lightweight (<500 lines of code total), not fully-featured. It is designed in a modular way so that developers can easily fork the repository and add functionality that they care about.
@@ -99,6 +99,9 @@ trackio.show(project="my project")
 
 ![Screen Recording 2025-05-12 at 2 43 38 PM](https://github.com/user-attachments/assets/d627c9c3-7365-4250-839c-db67dde34a02)
 
+## Running in a Space
+
+When calling `trackio.init`, by default the service will run locally and collect data on the local machine. If instead you pass a `space_id` to `init`, like `org_name/space_name` or `user_name/space_name`, it will use an existing or automatically deploy a new Hugging Face Space as needed. The current version of trackio is deployed to the specified space if it does not yet exist.
 
 ## License
 
