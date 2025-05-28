@@ -10,7 +10,6 @@ except:  # noqa: E722
     from sqlite_storage import SQLiteStorage
     from utils import RESERVED_KEYS, TRACKIO_LOGO_PATH
 
-
 def get_projects(request: gr.Request):
     storage = SQLiteStorage("", "", {})
     projects = storage.get_projects()

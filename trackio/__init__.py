@@ -34,6 +34,8 @@ def init(
     project: str,
     name: str | None = None,
     space_id: str | None = None,
+    persistent_dataset: str | None = None,
+    persistent_dataset_dir: str | None = None,
     config: dict | None = None,
 ) -> Run:
     """
@@ -63,7 +65,7 @@ def init(
             )
             print(f'* or by running in Python: trackio.show(project="{project}")')
         else:
-            create_space_if_not_exists(space_id)
+            create_space_if_not_exists(space_id, persistent_dataset, persistent_dataset_dir)
             print(
                 f"* View dashboard by going to: {SPACE_URL.format(space_id=space_id)}"
             )
@@ -77,7 +79,10 @@ def init(
     return run
 
 
-def create_space_if_not_exists(space_id: str) -> None:
+def create_space_if_not_exists(space_id: str,
+                               persistent_dataset: str | None = None,
+                               persistent_dataset_dir: str | None = None
+                               ) -> None:
     """
     Creates a new Hugging Face Space if it does not exist.
 
@@ -96,7 +101,7 @@ def create_space_if_not_exists(space_id: str) -> None:
         pass
 
     print(f"* Creating new space: {SPACE_URL.format(space_id=space_id)}")
-    deploy_as_space(space_id)
+    deploy_as_space(space_id, persistent_dataset, persistent_dataset_dir)
 
     client = None
     for _ in range(30):
