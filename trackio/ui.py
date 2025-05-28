@@ -1,7 +1,11 @@
+import os
 from typing import Any
 
 import gradio as gr
+import huggingface_hub as hf
 import pandas as pd
+
+HfApi = hf.HfApi()
 
 try:
     from trackio.sqlite_storage import SQLiteStorage
@@ -67,7 +71,20 @@ def toggle_timer(cb_value):
         return gr.Timer(active=False)
 
 
-def log(project: str, run: str, metrics: dict[str, Any]) -> None:
+def log(project: str, run: str, metrics: dict[str, Any], hf_token: str) -> None:
+    if os.getenv("SYSTEM") == "spaces":  # if we are running in Spaces
+        # check auth token passed in
+        if hf_token is None:
+            raise "Expected an hf_token to be provided when logging to a Space"
+        who = HfApi.whoami(hf_token)
+        owner_name = os.getenv("SPACE_AUTHOR_NAME")
+        # make sure the token user is either the author of the space,
+        # or is a member of an org that is the author.
+        # TODO: we should probably reject read-only or too-fine-grained tokens too...?
+        # but the logic to do that would be much more complex b/c of fine-grained tokens.
+        orgs = [o["name"] for o in who["orgs"]]
+        if owner_name != who["name"] and owner_name not in orgs:
+            raise "Expected the provided hf_token to be the user owner of the space, or be a member of the org owner of the space"
     storage = SQLiteStorage(project, run, {})
     storage.log(metrics)
 
