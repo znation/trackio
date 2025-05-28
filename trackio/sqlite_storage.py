@@ -22,6 +22,7 @@ else:
         repo_type="dataset",
         folder_path=TRACKIO_DIR,
         path_in_repo=PERSIST_TO_DATASET_DIR,
+        private=True,
     )
 
 
