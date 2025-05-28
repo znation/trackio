@@ -6,10 +6,12 @@ from pathlib import Path
 import gradio
 import huggingface_hub
 
-def deploy_as_space(title: str,
-                    persistent_dataset: str | None = None,
-                    persistent_dataset_dir: str | None = None
-                    ):
+
+def deploy_as_space(
+    title: str,
+    persistent_dataset: str | None = None,
+    persistent_dataset_dir: str | None = None,
+):
     if (
         os.getenv("SYSTEM") == "spaces"
     ):  # in case a repo with this function is uploaded to spaces
@@ -63,6 +65,10 @@ def deploy_as_space(title: str,
     if HF_TOKEN is not None:
         huggingface_hub.add_space_secret(space_id, "HF_TOKEN", HF_TOKEN)
     if persistent_dataset is not None:
-        huggingface_hub.add_space_variable(space_id, "PERSIST_TO_DATASET", persistent_dataset)
+        huggingface_hub.add_space_variable(
+            space_id, "PERSIST_TO_DATASET", persistent_dataset
+        )
     if persistent_dataset_dir is not None:
-        huggingface_hub.add_space_variable(space_id, "PERSIST_TO_DATASET_DIR", persistent_dataset_dir)
+        huggingface_hub.add_space_variable(
+            space_id, "PERSIST_TO_DATASET_DIR", persistent_dataset_dir
+        )
