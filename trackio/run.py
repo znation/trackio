@@ -1,3 +1,5 @@
+import os
+
 from gradio_client import Client
 
 from trackio.utils import generate_readable_name
@@ -18,7 +20,11 @@ class Run:
 
     def log(self, metrics: dict):
         self.client.predict(
-            api_name="/log", project=self.project, run=self.name, metrics=metrics
+            api_name="/log",
+            project=self.project,
+            run=self.name,
+            metrics=metrics,
+            hf_token=os.getenv("HF_TOKEN", ""),
         )
 
     def finish(self):
