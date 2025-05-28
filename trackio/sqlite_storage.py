@@ -1,8 +1,8 @@
 import json
 import os
+import sqlite3
 
 from huggingface_hub import CommitScheduler
-import sqlite3
 
 try:
     from trackio.dummy_commit_scheduler import DummyCommitScheduler
