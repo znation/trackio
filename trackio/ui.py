@@ -20,6 +20,35 @@ css = """
 }
 """
 
+COLOR_PALETTE = [
+    "#3B82F6",
+    "#EF4444",
+    "#10B981",
+    "#F59E0B",
+    "#8B5CF6",
+    "#EC4899",
+    "#06B6D4",
+    "#84CC16",
+    "#F97316",
+    "#6366F1",
+]
+
+
+def get_color_mapping(runs: list[str], smoothing: bool) -> dict[str, str]:
+    """Generate color mapping for runs, with transparency for original data when smoothing is enabled."""
+    color_map = {}
+
+    for i, run in enumerate(runs):
+        base_color = COLOR_PALETTE[i % len(COLOR_PALETTE)]
+
+        if smoothing:
+            color_map[f"{run}_smoothed"] = base_color
+            color_map[f"{run}_original"] = base_color + "4D"
+        else:
+            color_map[run] = base_color
+
+    return color_map
+
 
 def get_projects(request: gr.Request):
     storage = SQLiteStorage("", "", {})
@@ -53,13 +82,29 @@ def load_run_data(project: str | None, run: str | None, smoothing: bool):
     if not metrics:
         return None
     df = pd.DataFrame(metrics)
+
+    if "step" not in df.columns:
+        df["step"] = range(len(df))
+
     if smoothing:
         numeric_cols = df.select_dtypes(include="number").columns
         numeric_cols = [c for c in numeric_cols if c not in RESERVED_KEYS]
-        df[numeric_cols] = df[numeric_cols].ewm(alpha=0.1).mean()
-    if "step" not in df.columns:
-        df["step"] = range(len(df))
-    return df
+
+        df_original = df.copy()
+        df_original["run"] = f"{run}_original"
+        df_original["data_type"] = "original"
+
+        df_smoothed = df.copy()
+        df_smoothed[numeric_cols] = df_smoothed[numeric_cols].ewm(alpha=0.1).mean()
+        df_smoothed["run"] = f"{run}_smoothed"
+        df_smoothed["data_type"] = "smoothed"
+
+        combined_df = pd.concat([df_original, df_smoothed], ignore_index=True)
+        return combined_df
+    else:
+        df["run"] = run
+        df["data_type"] = "original"
+        return df
 
 
 def update_runs(project, filter_text, user_interacted_with_runs=False):
@@ -221,42 +266,59 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard", css=css) as demo:
     )
     def update_dashboard(project, runs, smoothing, metrics_subset, x_lim_value):
         dfs = []
+        original_runs = runs.copy()
+
         for run in runs:
             df = load_run_data(project, run, smoothing)
             if df is not None:
-                df["run"] = run
                 dfs.append(df)
+
         if dfs:
             master_df = pd.concat(dfs, ignore_index=True)
         else:
             master_df = pd.DataFrame()
+
+        if master_df.empty:
+            return
+
         numeric_cols = master_df.select_dtypes(include="number").columns
-        numeric_cols = [c for c in numeric_cols if c not in RESERVED_KEYS]
+        numeric_cols = [
+            c for c in numeric_cols if c not in RESERVED_KEYS and c != "step"
+        ]
         if metrics_subset:
             numeric_cols = [c for c in numeric_cols if c in metrics_subset]
         numeric_cols = sort_metrics_by_prefix(list(numeric_cols))
+
+        color_map = get_color_mapping(original_runs, smoothing)
+
         plots: list[gr.LinePlot] = []
         for col in range((len(numeric_cols) + 1) // 2):
             with gr.Row(key=f"row-{col}"):
                 for i in range(2):
                     metric_idx = 2 * col + i
                     if metric_idx < len(numeric_cols):
-                        plot = gr.LinePlot(
-                            master_df,
-                            x="step",
-                            y=numeric_cols[metric_idx],
-                            color="run" if "run" in master_df.columns else None,
-                            title=numeric_cols[metric_idx],
-                            key=f"plot-{col}-{i}",
-                            preserved_by_key=None,
-                            x_lim=x_lim_value,
-                            y_lim=[
-                                min(master_df[numeric_cols[metric_idx]]),
-                                max(master_df[numeric_cols[metric_idx]]),
-                            ],
-                            show_fullscreen_button=True,
-                        )
-                        plots.append(plot)
+                        metric_name = numeric_cols[metric_idx]
+
+                        metric_df = master_df.dropna(subset=[metric_name])
+
+                        if not metric_df.empty:
+                            plot = gr.LinePlot(
+                                metric_df,
+                                x="step",
+                                y=metric_name,
+                                color="run" if "run" in metric_df.columns else None,
+                                color_map=color_map,
+                                title=metric_name,
+                                key=f"plot-{col}-{i}",
+                                preserved_by_key=None,
+                                x_lim=x_lim_value,
+                                y_lim=[
+                                    metric_df[metric_name].min(),
+                                    metric_df[metric_name].max(),
+                                ],
+                                show_fullscreen_button=True,
+                            )
+                            plots.append(plot)
 
         for plot in plots:
             plot.select(update_x_lim, outputs=x_lim)
