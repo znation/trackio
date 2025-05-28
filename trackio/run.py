@@ -1,3 +1,5 @@
+import os
+
 from gradio_client import Client
 
 from trackio.utils import generate_readable_name
@@ -25,6 +27,7 @@ class Run:
             run=self.name,
             metrics=metrics,
             dataset_id=self.dataset_id,
+            hf_token=os.getenv("HF_TOKEN", ""),
         )
 
     def finish(self):
