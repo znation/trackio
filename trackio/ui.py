@@ -10,6 +10,16 @@ except:  # noqa: E722
     from sqlite_storage import SQLiteStorage
     from utils import RESERVED_KEYS, TRACKIO_LOGO_PATH
 
+css = """
+#run-cb .wrap {
+    gap: 2px;
+}
+#run-cb .wrap label {
+    line-height: 1;
+    padding: 6px;
+}
+"""
+
 
 def get_projects(request: gr.Request):
     storage = SQLiteStorage("", "", {})
@@ -55,14 +65,18 @@ def load_run_data(project: str | None, run: str | None, smoothing: bool):
 def update_runs(project, filter_text, user_interacted_with_runs=False):
     if project is None:
         runs = []
+        num_runs = 0
     else:
         runs = get_runs(project)
+        num_runs = len(runs)
         if filter_text:
             runs = [r for r in runs if filter_text in r]
     if not user_interacted_with_runs:
-        return gr.CheckboxGroup(choices=runs, value=runs)
+        return gr.CheckboxGroup(
+            choices=runs, value=[runs[0]] if runs else []
+        ), gr.Textbox(label=f"Runs ({num_runs})")
     else:
-        return gr.CheckboxGroup(choices=runs)
+        return gr.CheckboxGroup(choices=runs), gr.Textbox(label=f"Runs ({num_runs})")
 
 
 def filter_runs(project, filter_text):
@@ -90,14 +104,16 @@ def configure(request: gr.Request):
         return []
 
 
-with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
+with gr.Blocks(theme="citrus", title="Trackio Dashboard", css=css) as demo:
     with gr.Sidebar() as sidebar:
         gr.Markdown(
             f"<div style='display: flex; align-items: center; gap: 8px;'><img src='/gradio_api/file={TRACKIO_LOGO_PATH}' width='32' height='32'><span style='font-size: 2em; font-weight: bold;'>Trackio</span></div>"
         )
         project_dd = gr.Dropdown(label="Project")
-        run_tb = gr.Textbox(label="Runs (99)", placeholder="Type to filter...")
-        run_cb = gr.CheckboxGroup(label="Runs", choices=[], interactive=True)
+        run_tb = gr.Textbox(label="Runs", placeholder="Type to filter...")
+        run_cb = gr.CheckboxGroup(
+            label="Runs", choices=[], interactive=True, elem_id="run-cb"
+        )
     with gr.Sidebar(position="right", open=False) as settings_sidebar:
         gr.Markdown("### ⚙️ Settings")
         realtime_cb = gr.Checkbox(label="Refresh realtime", value=True)
@@ -122,14 +138,14 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
         [timer.tick],
         fn=update_runs,
         inputs=[project_dd, run_tb, user_interacted_with_run_cb],
-        outputs=run_cb,
+        outputs=[run_cb, run_tb],
         show_progress="hidden",
     )
     gr.on(
         [demo.load, project_dd.change],
         fn=update_runs,
         inputs=[project_dd, run_tb],
-        outputs=run_cb,
+        outputs=[run_cb, run_tb],
         show_progress="hidden",
     )
 
