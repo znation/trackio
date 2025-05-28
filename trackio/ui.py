@@ -97,6 +97,40 @@ def log(project: str, run: str, metrics: dict[str, Any]) -> None:
     storage.log(metrics)
 
 
+def sort_metrics_by_prefix(metrics: list[str]) -> list[str]:
+    """
+    Sort metrics by grouping prefixes together.
+    Metrics without prefixes come first, then grouped by prefix.
+
+    Example:
+    Input: ["train/loss", "loss", "train/acc", "val/loss"]
+    Output: ["loss", "train/acc", "train/loss", "val/loss"]
+    """
+    no_prefix = []
+    with_prefix = []
+
+    for metric in metrics:
+        if "/" in metric:
+            with_prefix.append(metric)
+        else:
+            no_prefix.append(metric)
+
+    no_prefix.sort()
+
+    prefix_groups = {}
+    for metric in with_prefix:
+        prefix = metric.split("/")[0]
+        if prefix not in prefix_groups:
+            prefix_groups[prefix] = []
+        prefix_groups[prefix].append(metric)
+
+    sorted_with_prefix = []
+    for prefix in sorted(prefix_groups.keys()):
+        sorted_with_prefix.extend(sorted(prefix_groups[prefix]))
+
+    return no_prefix + sorted_with_prefix
+
+
 def configure(request: gr.Request):
     if metrics := request.query_params.get("metrics"):
         return metrics.split(",")
@@ -200,26 +234,29 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard", css=css) as demo:
         numeric_cols = [c for c in numeric_cols if c not in RESERVED_KEYS]
         if metrics_subset:
             numeric_cols = [c for c in numeric_cols if c in metrics_subset]
+        numeric_cols = sort_metrics_by_prefix(list(numeric_cols))
         plots: list[gr.LinePlot] = []
-        for col in range(len(numeric_cols) // 2):
+        for col in range((len(numeric_cols) + 1) // 2):
             with gr.Row(key=f"row-{col}"):
                 for i in range(2):
-                    plot = gr.LinePlot(
-                        master_df,
-                        x="step",
-                        y=numeric_cols[2 * col + i],
-                        color="run" if "run" in master_df.columns else None,
-                        title=numeric_cols[2 * col + i],
-                        key=f"plot-{col}-{i}",
-                        preserved_by_key=None,
-                        x_lim=x_lim_value,
-                        y_lim=[
-                            min(master_df[numeric_cols[2 * col + i]]),
-                            max(master_df[numeric_cols[2 * col + i]]),
-                        ],
-                        show_fullscreen_button=True,
-                    )
-                    plots.append(plot)
+                    metric_idx = 2 * col + i
+                    if metric_idx < len(numeric_cols):
+                        plot = gr.LinePlot(
+                            master_df,
+                            x="step",
+                            y=numeric_cols[metric_idx],
+                            color="run" if "run" in master_df.columns else None,
+                            title=numeric_cols[metric_idx],
+                            key=f"plot-{col}-{i}",
+                            preserved_by_key=None,
+                            x_lim=x_lim_value,
+                            y_lim=[
+                                min(master_df[numeric_cols[metric_idx]]),
+                                max(master_df[numeric_cols[metric_idx]]),
+                            ],
+                            show_fullscreen_button=True,
+                        )
+                        plots.append(plot)
 
         for plot in plots:
             plot.select(update_x_lim, outputs=x_lim)
