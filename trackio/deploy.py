@@ -59,9 +59,11 @@ def deploy_as_space(
         ignore_patterns=["README.md"],
     )
 
-    # add HF_TOKEN so we have access to dataset to persist data
-    HF_TOKEN = os.environ.get("HF_TOKEN")
-    if HF_TOKEN is not None:
-        huggingface_hub.add_space_secret(space_id, "HF_TOKEN", HF_TOKEN)
+    hf_token = huggingface_hub.utils.get_token()
+    if hf_token is not None:
+        huggingface_hub.add_space_secret(space_id, "HF_TOKEN", hf_token)
     if dataset_id is not None:
-        huggingface_hub.add_space_variable(space_id, "DATASET_ID", dataset_id)
+        huggingface_hub.add_space_variable(space_id, "TRACKIO_DATASET_ID", dataset_id)
+        # So that the dataset id is available to the sqlite_storage.py file
+        # if running locally as well.
+        os.environ["TRACKIO_DATASET_ID"] = dataset_id

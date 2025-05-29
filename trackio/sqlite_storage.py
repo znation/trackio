@@ -2,28 +2,16 @@ import json
 import os
 import sqlite3
 
+import huggingface_hub.utils
 from huggingface_hub import CommitScheduler
 
+huggingface_hub.utils.build_hf_headers()
 try:
     from trackio.dummy_commit_scheduler import DummyCommitScheduler
     from trackio.utils import RESERVED_KEYS, TRACKIO_DIR
 except:  # noqa: E722
     from dummy_commit_scheduler import DummyCommitScheduler
     from utils import RESERVED_KEYS, TRACKIO_DIR
-
-HF_TOKEN = os.environ.get("HF_TOKEN")
-DATASET_ID = os.environ.get("DATASET_ID")
-if DATASET_ID is None:
-    scheduler = DummyCommitScheduler()
-else:
-    scheduler = CommitScheduler(
-        repo_id=DATASET_ID,
-        repo_type="dataset",
-        folder_path=TRACKIO_DIR,
-        private=True,
-        squash_history=True,
-        token=HF_TOKEN,
-    )
 
 
 class SQLiteStorage:
@@ -32,15 +20,34 @@ class SQLiteStorage:
         self.name = name
         self.config = config
         self.db_path = os.path.join(TRACKIO_DIR, "trackio.db")
+        self.scheduler = self._get_scheduler()
 
         os.makedirs(TRACKIO_DIR, exist_ok=True)
 
         self._init_db()
         self._save_config()
 
+    def _get_scheduler(self):
+        hf_token = os.environ.get(
+            "HF_TOKEN"
+        )  # Get the token from the environment variable on Spaces
+        dataset_id = os.environ.get("TRACKIO_DATASET_ID")
+        if dataset_id is None:
+            scheduler = DummyCommitScheduler()
+        else:
+            scheduler = CommitScheduler(
+                repo_id=dataset_id,
+                repo_type="dataset",
+                folder_path=TRACKIO_DIR,
+                private=True,
+                squash_history=True,
+                token=hf_token,
+            )
+        return scheduler
+
     def _init_db(self):
         """Initialize the SQLite database with required tables."""
-        with scheduler.lock:
+        with self.scheduler.lock:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
 
@@ -68,7 +75,7 @@ class SQLiteStorage:
 
     def _save_config(self):
         """Save the run configuration to the database."""
-        with scheduler.lock:
+        with self.scheduler.lock:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute(
@@ -85,7 +92,7 @@ class SQLiteStorage:
                     f"Please do not use this reserved key as a metric: {k}"
                 )
 
-        with scheduler.lock:
+        with self.scheduler.lock:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute(
