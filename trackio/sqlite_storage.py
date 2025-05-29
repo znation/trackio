@@ -12,18 +12,17 @@ except:  # noqa: E722
     from utils import RESERVED_KEYS, TRACKIO_DIR
 
 HF_TOKEN = os.environ.get("HF_TOKEN")
-PERSIST_TO_DATASET = os.environ.get("PERSIST_TO_DATASET")
-PERSIST_TO_DATASET_DIR = os.environ.get("PERSIST_TO_DATASET_DIR")
-if PERSIST_TO_DATASET is None:
+DATASET_ID = os.environ.get("DATASET_ID")
+if DATASET_ID is None:
     scheduler = DummyCommitScheduler()
 else:
     scheduler = CommitScheduler(
-        repo_id=PERSIST_TO_DATASET,
+        repo_id=DATASET_ID,
         repo_type="dataset",
         folder_path=TRACKIO_DIR,
-        path_in_repo=PERSIST_TO_DATASET_DIR,
         private=True,
-        squash_history=True
+        squash_history=True,
+        token=HF_TOKEN,
     )
 
 

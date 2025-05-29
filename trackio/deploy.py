@@ -9,8 +9,7 @@ import huggingface_hub
 
 def deploy_as_space(
     title: str,
-    persistent_dataset: str | None = None,
-    persistent_dataset_dir: str | None = None,
+    dataset_id: str | None = None,
 ):
     if (
         os.getenv("SYSTEM") == "spaces"
@@ -64,11 +63,5 @@ def deploy_as_space(
     HF_TOKEN = os.environ.get("HF_TOKEN")
     if HF_TOKEN is not None:
         huggingface_hub.add_space_secret(space_id, "HF_TOKEN", HF_TOKEN)
-    if persistent_dataset is not None:
-        huggingface_hub.add_space_variable(
-            space_id, "PERSIST_TO_DATASET", persistent_dataset
-        )
-    if persistent_dataset_dir is not None:
-        huggingface_hub.add_space_variable(
-            space_id, "PERSIST_TO_DATASET_DIR", persistent_dataset_dir
-        )
+    if dataset_id is not None:
+        huggingface_hub.add_space_variable(space_id, "DATASET_ID", dataset_id)

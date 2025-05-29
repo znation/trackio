@@ -34,8 +34,7 @@ def init(
     project: str,
     name: str | None = None,
     space_id: str | None = None,
-    persistent_dataset: str | None = None,
-    persistent_dataset_dir: str | None = None,
+    dataset_id: str | None = None,
     config: dict | None = None,
 ) -> Run:
     """
@@ -45,6 +44,7 @@ def init(
         project: The name of the project (can be an existing project to continue tracking or a new project to start tracking from scratch).
         name: The name of the run (if not provided, a default name will be generated).
         space_id: If provided, the project will be logged to a Hugging Face Space instead of a local directory. Should be a complete Space name like "username/reponame". If the Space does not exist, it will be created. If the Space already exists, the project will be logged to it.
+        dataset_id: If provided, a persistent Hugging Face Dataset will be created and the metrics will be synced to it every 5 minutes. Should be a complete Dataset name like "username/datasetname". If the Dataset does not exist, it will be created. If the Dataset already exists, the project will be appended to it.
         config: A dictionary of configuration options. Provided for compatibility with wandb.init()
     """
     if not current_server.get() and space_id is None:
@@ -65,9 +65,7 @@ def init(
             )
             print(f'* or by running in Python: trackio.show(project="{project}")')
         else:
-            create_space_if_not_exists(
-                space_id, persistent_dataset, persistent_dataset_dir
-            )
+            create_space_if_not_exists(space_id, dataset_id)
             print(
                 f"* View dashboard by going to: {SPACE_URL.format(space_id=space_id)}"
             )
@@ -83,14 +81,14 @@ def init(
 
 def create_space_if_not_exists(
     space_id: str,
-    persistent_dataset: str | None = None,
-    persistent_dataset_dir: str | None = None,
+    dataset_id: str | None = None,
 ) -> None:
     """
     Creates a new Hugging Face Space if it does not exist.
 
     Args:
         space_id: The ID of the Space to create.
+        dataset_id: The ID of the Dataset to create.
     """
     if "/" not in space_id:
         raise ValueError(
@@ -104,7 +102,7 @@ def create_space_if_not_exists(
         pass
 
     print(f"* Creating new space: {SPACE_URL.format(space_id=space_id)}")
-    deploy_as_space(space_id, persistent_dataset, persistent_dataset_dir)
+    deploy_as_space(space_id, dataset_id)
 
     client = None
     for _ in range(30):
