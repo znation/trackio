@@ -25,6 +25,9 @@ current_project: contextvars.ContextVar[str | None] = contextvars.ContextVar(
 current_server: contextvars.ContextVar[str | None] = contextvars.ContextVar(
     "current_server", default=None
 )
+current_dataset_id: contextvars.ContextVar[str | None] = contextvars.ContextVar(
+    "current_dataset_id", default=None
+)
 
 config = {}
 SPACE_URL = "https://huggingface.co/spaces/{space_id}"
@@ -70,10 +73,14 @@ def init(
                 f"* View dashboard by going to: {SPACE_URL.format(space_id=space_id)}"
             )
     current_project.set(project)
+    print(f"initializing dataset_id: {dataset_id}")
+    current_dataset_id.set(dataset_id)
 
     space_or_url = space_id if space_id else url
     client = Client(space_or_url, verbose=False)
-    run = Run(project=project, client=client, name=name, config=config)
+    run = Run(
+        project=project, client=client, name=name, config=config, dataset_id=dataset_id
+    )
     current_run.set(run)
     globals()["config"] = run.config
     return run
@@ -93,6 +100,10 @@ def create_space_if_not_exists(
     if "/" not in space_id:
         raise ValueError(
             f"Invalid space ID: {space_id}. Must be in the format: username/reponame."
+        )
+    if dataset_id is not None and "/" not in dataset_id:
+        raise ValueError(
+            f"Invalid dataset ID: {dataset_id}. Must be in the format: username/datasetname."
         )
     try:
         huggingface_hub.repo_info(space_id, repo_type="space")

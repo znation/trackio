@@ -13,12 +13,15 @@ except:  # noqa: E722
 
 
 class SQLiteStorage:
-    def __init__(self, project: str, name: str, config: dict):
+    def __init__(
+        self, project: str, name: str, config: dict, dataset_id: str | None = None
+    ):
         self.project = project
         self.name = name
         self.config = config
         self.db_path = os.path.join(TRACKIO_DIR, "trackio.db")
         self.scheduler = self._get_scheduler()
+        self.dataset_id = dataset_id
 
         os.makedirs(TRACKIO_DIR, exist_ok=True)
 
@@ -29,7 +32,7 @@ class SQLiteStorage:
         hf_token = os.environ.get(
             "HF_TOKEN"
         )  # Get the token from the environment variable on Spaces
-        dataset_id = os.environ.get("TRACKIO_DATASET_ID")
+        dataset_id = self.dataset_id or os.environ.get("TRACKIO_DATASET_ID")
         if dataset_id is None:
             scheduler = DummyCommitScheduler()
         else:
