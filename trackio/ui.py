@@ -1,3 +1,4 @@
+import os
 from typing import Any
 
 import gradio as gr
@@ -51,7 +52,8 @@ def get_color_mapping(runs: list[str], smoothing: bool) -> dict[str, str]:
 
 
 def get_projects(request: gr.Request):
-    storage = SQLiteStorage("", "", {})
+    dataset_id = os.environ.get("TRACKIO_DATASET_ID", "abidlabs/metrics")
+    storage = SQLiteStorage("", "", {}, dataset_id=dataset_id)
     projects = storage.get_projects()
     if project := request.query_params.get("project"):
         interactive = False
@@ -64,6 +66,9 @@ def get_projects(request: gr.Request):
         value=project,
         allow_custom_value=True,
         interactive=interactive,
+        info=f"&#x21bb; Synced to <a href='https://huggingface.co/{dataset_id}' target='_blank'>{dataset_id}</a> every 5 min"
+        if dataset_id
+        else None,
     )
 
 
@@ -195,6 +200,7 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard", css=css) as demo:
         run_cb = gr.CheckboxGroup(
             label="Runs", choices=[], interactive=True, elem_id="run-cb"
         )
+
     with gr.Sidebar(position="right", open=False) as settings_sidebar:
         gr.Markdown("### ⚙️ Settings")
         realtime_cb = gr.Checkbox(label="Refresh realtime", value=True)
