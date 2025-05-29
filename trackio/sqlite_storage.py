@@ -20,8 +20,8 @@ class SQLiteStorage:
         self.name = name
         self.config = config
         self.db_path = os.path.join(TRACKIO_DIR, "trackio.db")
-        self.scheduler = self._get_scheduler()
         self.dataset_id = dataset_id
+        self.scheduler = self._get_scheduler()
 
         os.makedirs(TRACKIO_DIR, exist_ok=True)
 
