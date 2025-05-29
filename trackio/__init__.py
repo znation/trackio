@@ -25,9 +25,6 @@ current_project: contextvars.ContextVar[str | None] = contextvars.ContextVar(
 current_server: contextvars.ContextVar[str | None] = contextvars.ContextVar(
     "current_server", default=None
 )
-current_dataset_id: contextvars.ContextVar[str | None] = contextvars.ContextVar(
-    "current_dataset_id", default=None
-)
 
 config = {}
 SPACE_URL = "https://huggingface.co/spaces/{space_id}"
@@ -73,8 +70,6 @@ def init(
                 f"* View dashboard by going to: {SPACE_URL.format(space_id=space_id)}"
             )
     current_project.set(project)
-    print(f"initializing dataset_id: {dataset_id}")
-    current_dataset_id.set(dataset_id)
 
     space_or_url = space_id if space_id else url
     client = Client(space_or_url, verbose=False)
