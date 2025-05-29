@@ -12,9 +12,7 @@ wandb.init(
         learning_rate=0.001,
         batch_size=32,
     ),
-    space_id="abidlabs/metrics-test",
-    persistent_dataset="abidlabs/metrics",
-    persistent_dataset_dir=".",
+    dataset_id="abidlabs/metrics",
 )
 
 EPOCHS = 5
