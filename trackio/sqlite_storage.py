@@ -2,10 +2,8 @@ import json
 import os
 import sqlite3
 
-import huggingface_hub.utils
 from huggingface_hub import CommitScheduler
 
-huggingface_hub.utils.build_hf_headers()
 try:
     from trackio.dummy_commit_scheduler import DummyCommitScheduler
     from trackio.utils import RESERVED_KEYS, TRACKIO_DIR
