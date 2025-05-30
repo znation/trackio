@@ -7,7 +7,10 @@ import gradio
 import huggingface_hub
 
 
-def deploy_as_space(title: str):
+def deploy_as_space(
+    title: str,
+    dataset_id: str | None = None,
+):
     if (
         os.getenv("SYSTEM") == "spaces"
     ):  # in case a repo with this function is uploaded to spaces
@@ -55,3 +58,12 @@ def deploy_as_space(title: str):
         folder_path=trackio_path,
         ignore_patterns=["README.md"],
     )
+
+    hf_token = huggingface_hub.utils.get_token()
+    if hf_token is not None:
+        huggingface_hub.add_space_secret(space_id, "HF_TOKEN", hf_token)
+    if dataset_id is not None:
+        huggingface_hub.add_space_variable(space_id, "TRACKIO_DATASET_ID", dataset_id)
+        # So that the dataset id is available to the sqlite_storage.py file
+        # if running locally as well.
+        os.environ["TRACKIO_DATASET_ID"] = dataset_id
