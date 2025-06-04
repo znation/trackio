@@ -1,6 +1,5 @@
-import os
-
 from gradio_client import Client
+import huggingface_hub
 
 from trackio.utils import generate_readable_name
 
@@ -27,7 +26,7 @@ class Run:
             run=self.name,
             metrics=metrics,
             dataset_id=self.dataset_id,
-            hf_token=os.getenv("HF_TOKEN", ""),
+            hf_token=huggingface_hub.utils.get_token(),
         )
 
     def finish(self):
