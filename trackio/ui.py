@@ -139,20 +139,13 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
         numeric_cols = [c for c in numeric_cols if c not in RESERVED_KEYS]
         if metrics_subset:
             numeric_cols = [c for c in numeric_cols if c in metrics_subset]
-<<<<<<< Updated upstream
         for col in range(len(numeric_cols) // 2):
             with gr.Row():
                 gr.LinePlot(
-=======
-        with gr.Row(key=f"row"):
-            for col_idx, col in enumerate(numeric_cols):
-                plot = gr.LinePlot(
->>>>>>> Stashed changes
                     master_df,
                     x="step",
                     y=col,
                     color="run" if "run" in master_df.columns else None,
-<<<<<<< Updated upstream
                     title=numeric_cols[2 * col],
                 )
                 if 2 * col + 1 < len(numeric_cols):
@@ -164,16 +157,6 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
                         title=numeric_cols[2 * col + 1],
                     )
 
-=======
-                    title=col,
-                    key=f"plot-{col_idx}",
-                    preserved_by_key=None,
-                    x_lim=x_lim_value,
-                    min_width=400,
-                )
-                plot.select(update_x_lim, outputs=x_lim, key=f"select-{col_idx}")
-                plot.double_click(lambda: None, outputs=x_lim, key=f"double-{col_idx}")
->>>>>>> Stashed changes
 
 if __name__ == "__main__":
     demo.launch(allowed_paths=[TRACKIO_LOGO_PATH])
