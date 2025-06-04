@@ -144,7 +144,7 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard") as demo:
         numeric_cols = [c for c in numeric_cols if c not in RESERVED_KEYS]
         if metrics_subset:
             numeric_cols = [c for c in numeric_cols if c in metrics_subset]
-        with gr.Row(key=f"row"):
+        with gr.Row(key="row"):
             for col_idx, col in enumerate(numeric_cols):
                 plot = gr.LinePlot(
                     master_df,
