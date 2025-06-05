@@ -318,6 +318,7 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard", css=css) as demo:
                             metric_df[metric_name].max(),
                         ],
                         show_fullscreen_button=True,
+                        min_width=400,
                     )
                 plot.select(update_x_lim, outputs=x_lim, key=f"select-{metric_idx}")
                 plot.double_click(
