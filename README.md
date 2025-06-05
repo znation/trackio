@@ -7,8 +7,8 @@
 ## Features
 - **API compatible** with `wandb.init`, `wandb.log`, and `wandb.finish` (drop-in replacement: just use `trackio` instead of `wandb`)
 - Persists logs in a private Hugging Face Dataset
-- Visualize experiments with a Gradio dashboard
-- *Local-first* design: dashboard runs locally by default. You can also host it on Spaces by specifying a `space_id` parameter in `init`.
+- Visualize experiments with a Gradio dashboard locally or on Hugging Face Spaces
+- *Local-first* design: dashboard runs locally by default. You can also host it on Spaces by specifying a `space_id`.
 - Everything here, including hosting on Spaces, is **free**!
 
 Trackio is designed to be lightweight (<1000 lines of Python code total), not fully-featured. It is designed in an extensible way and written entirely in Python so that developers can easily fork the repository and add functionality that they care about.
