@@ -53,8 +53,7 @@ def get_color_mapping(runs: list[str], smoothing: bool) -> dict[str, str]:
 
 def get_projects(request: gr.Request):
     dataset_id = os.environ.get("TRACKIO_DATASET_ID")
-    storage = SQLiteStorage("", "", {}, dataset_id=dataset_id)
-    projects = storage.get_projects()
+    projects = SQLiteStorage.get_projects()
     if project := request.query_params.get("project"):
         interactive = False
     else:
@@ -75,15 +74,13 @@ def get_projects(request: gr.Request):
 def get_runs(project):
     if not project:
         return []
-    storage = SQLiteStorage("", "", {})
-    return storage.get_runs(project)
+    return SQLiteStorage.get_runs(project)
 
 
 def load_run_data(project: str | None, run: str | None, smoothing: bool):
     if not project or not run:
         return None
-    storage = SQLiteStorage("", "", {})
-    metrics = storage.get_metrics(project, run)
+    metrics = SQLiteStorage.get_metrics(project, run)
     if not metrics:
         return None
     df = pd.DataFrame(metrics)
