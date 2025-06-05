@@ -1,6 +1,8 @@
 import json
 import os
 import sqlite3
+import glob
+from pathlib import Path
 
 from huggingface_hub import CommitScheduler
 
@@ -19,7 +21,8 @@ class SQLiteStorage:
         self.project = project
         self.name = name
         self.config = config
-        self.db_path = os.path.join(TRACKIO_DIR, "trackio.db")
+        # Use project-specific database file
+        self.db_path = self._get_project_db_path(project)
         self.dataset_id = dataset_id
         self.scheduler = self._get_scheduler()
 
@@ -27,6 +30,15 @@ class SQLiteStorage:
 
         self._init_db()
         self._save_config()
+
+    @staticmethod
+    def _get_project_db_path(project: str) -> str:
+        """Get the database path for a specific project."""
+        # Sanitize project name for filename
+        safe_project_name = "".join(c for c in project if c.isalnum() or c in ('-', '_')).rstrip()
+        if not safe_project_name:
+            safe_project_name = "default"
+        return os.path.join(TRACKIO_DIR, f"{safe_project_name}.db")
 
     def _get_scheduler(self):
         hf_token = os.environ.get(
@@ -106,9 +118,15 @@ class SQLiteStorage:
                 )
                 conn.commit()
 
-    def get_metrics(self, project: str, run: str) -> list[dict]:
+    @staticmethod
+    def get_metrics(project: str, run: str) -> list[dict]:
         """Retrieve metrics for a specific run."""
-        with sqlite3.connect(self.db_path) as conn:
+        # Get the database path for the specific project
+        db_path = SQLiteStorage._get_project_db_path(project)
+        if not os.path.exists(db_path):
+            return []
+            
+        with sqlite3.connect(db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
                 """
@@ -130,16 +148,41 @@ class SQLiteStorage:
 
             return results
 
-    def get_projects(self) -> list[str]:
-        """Get list of all projects."""
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT DISTINCT project_name FROM metrics")
-            return [row[0] for row in cursor.fetchall()]
+    @staticmethod
+    def get_projects() -> list[str]:
+        """Get list of all projects by scanning database files."""
+        projects = []
+        if not os.path.exists(TRACKIO_DIR):
+            return projects
+            
+        # Find all .db files in the trackio directory
+        db_files = glob.glob(os.path.join(TRACKIO_DIR, "*.db"))
+        
+        for db_file in db_files:
+            try:
+                with sqlite3.connect(db_file) as conn:
+                    cursor = conn.cursor()
+                    # Check if the database has the expected structure
+                    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='metrics'")
+                    if cursor.fetchone():
+                        # Get project names from this database
+                        cursor.execute("SELECT DISTINCT project_name FROM metrics")
+                        project_names = [row[0] for row in cursor.fetchall()]
+                        projects.extend(project_names)
+            except sqlite3.Error:
+                # Skip corrupted or invalid database files
+                continue
+        
+        return list(set(projects))  # Remove duplicates
 
-    def get_runs(self, project: str) -> list[str]:
+    @staticmethod
+    def get_runs(project: str) -> list[str]:
         """Get list of all runs for a project."""
-        with sqlite3.connect(self.db_path) as conn:
+        db_path = SQLiteStorage._get_project_db_path(project)
+        if not os.path.exists(db_path):
+            return []
+            
+        with sqlite3.connect(db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT DISTINCT run_name FROM metrics WHERE project_name = ?",
