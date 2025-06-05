@@ -4,6 +4,9 @@
 
 `trackio` is a lightweight alternative for `wandb` that uses Hugging Face Datasets for experiment logging and Gradio / Spaces for visualization.
 
+<img width="1371" alt="image" src="https://github.com/user-attachments/assets/5a42054d-8b01-49cb-acb3-d8884413904e" />
+
+
 ## Features
 - **API compatible** with `wandb.init`, `wandb.log`, and `wandb.finish` (drop-in replacement: just use `trackio` instead of `wandb`)
 - Persists logs in a private Hugging Face Dataset
@@ -95,9 +98,6 @@ or, in Python:
 ```py
 trackio.show(project="my project")
 ```
-
-
-![Screen Recording 2025-05-12 at 2 43 38 PM](https://github.com/user-attachments/assets/d627c9c3-7365-4250-839c-db67dde34a02)
 
 ## Running in a Space
 
