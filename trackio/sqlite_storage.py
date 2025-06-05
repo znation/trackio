@@ -1,7 +1,7 @@
+import glob
 import json
 import os
 import sqlite3
-import glob
 from pathlib import Path
 
 from huggingface_hub import CommitScheduler
@@ -34,7 +34,9 @@ class SQLiteStorage:
     @staticmethod
     def _get_project_db_path(project: str) -> str:
         """Get the database path for a specific project."""
-        safe_project_name = "".join(c for c in project if c.isalnum() or c in ('-', '_')).rstrip()
+        safe_project_name = "".join(
+            c for c in project if c.isalnum() or c in ("-", "_")
+        ).rstrip()
         if not safe_project_name:
             safe_project_name = "default"
         return os.path.join(TRACKIO_DIR, f"{safe_project_name}.db")
@@ -124,7 +126,7 @@ class SQLiteStorage:
         db_path = SQLiteStorage._get_project_db_path(project)
         if not os.path.exists(db_path):
             return []
-            
+
         with sqlite3.connect(db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -153,15 +155,17 @@ class SQLiteStorage:
         projects = []
         if not os.path.exists(TRACKIO_DIR):
             return projects
-            
+
         db_files = glob.glob(os.path.join(TRACKIO_DIR, "*.db"))
-        
+
         for db_file in db_files:
             try:
                 with sqlite3.connect(db_file) as conn:
                     cursor = conn.cursor()
                     # Check if the database has the expected structure
-                    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='metrics'")
+                    cursor.execute(
+                        "SELECT name FROM sqlite_master WHERE type='table' AND name='metrics'"
+                    )
                     if cursor.fetchone():
                         # Get project names from this database
                         cursor.execute("SELECT DISTINCT project_name FROM metrics")
@@ -170,7 +174,7 @@ class SQLiteStorage:
             except sqlite3.Error:
                 # Skip corrupted or invalid database files
                 continue
-        
+
         return list(set(projects))  # Remove duplicates
 
     @staticmethod
@@ -179,7 +183,7 @@ class SQLiteStorage:
         db_path = SQLiteStorage._get_project_db_path(project)
         if not os.path.exists(db_path):
             return []
-            
+
         with sqlite3.connect(db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
