@@ -52,7 +52,7 @@ def get_color_mapping(runs: list[str], smoothing: bool) -> dict[str, str]:
 
 
 def get_projects(request: gr.Request):
-    dataset_id = os.environ.get("TRACKIO_DATASET_ID", "abidlabs/metrics")
+    dataset_id = os.environ.get("TRACKIO_DATASET_ID")
     storage = SQLiteStorage("", "", {}, dataset_id=dataset_id)
     projects = storage.get_projects()
     if project := request.query_params.get("project"):
