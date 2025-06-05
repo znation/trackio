@@ -295,42 +295,35 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard", css=css) as demo:
         ]
         if metrics_subset:
             numeric_cols = [c for c in numeric_cols if c in metrics_subset]
-        numeric_cols = sort_metrics_by_prefix(list(numeric_cols))
 
+        numeric_cols = sort_metrics_by_prefix(list(numeric_cols))
         color_map = get_color_mapping(original_runs, smoothing)
 
-        plots: list[gr.LinePlot] = []
-        for col in range((len(numeric_cols) + 1) // 2):
-            with gr.Row(key=f"row-{col}"):
-                for i in range(2):
-                    metric_idx = 2 * col + i
-                    if metric_idx < len(numeric_cols):
-                        metric_name = numeric_cols[metric_idx]
-
-                        metric_df = master_df.dropna(subset=[metric_name])
-
-                        if not metric_df.empty:
-                            plot = gr.LinePlot(
-                                metric_df,
-                                x="step",
-                                y=metric_name,
-                                color="run" if "run" in metric_df.columns else None,
-                                color_map=color_map,
-                                title=metric_name,
-                                key=f"plot-{col}-{i}",
-                                preserved_by_key=None,
-                                x_lim=x_lim_value,
-                                y_lim=[
-                                    metric_df[metric_name].min(),
-                                    metric_df[metric_name].max(),
-                                ],
-                                show_fullscreen_button=True,
-                            )
-                            plots.append(plot)
-
-        for plot in plots:
-            plot.select(update_x_lim, outputs=x_lim)
-            plot.double_click(lambda: None, outputs=x_lim)
+        with gr.Row(key="row"):
+            for metric_idx, metric_name in enumerate(numeric_cols):
+                metric_df = master_df.dropna(subset=[metric_name])
+                if not metric_df.empty:
+                    plot = gr.LinePlot(
+                        metric_df,
+                        x="step",
+                        y=metric_name,
+                        color="run" if "run" in metric_df.columns else None,
+                        color_map=color_map,
+                        title=metric_name,
+                        key=f"plot-{metric_idx}",
+                        preserved_by_key=None,
+                        x_lim=x_lim_value,
+                        y_lim=[
+                            metric_df[metric_name].min(),
+                            metric_df[metric_name].max(),
+                        ],
+                        show_fullscreen_button=True,
+                        min_width=400,
+                    )
+                plot.select(update_x_lim, outputs=x_lim, key=f"select-{metric_idx}")
+                plot.double_click(
+                    lambda: None, outputs=x_lim, key=f"double-{metric_idx}"
+                )
 
 
 if __name__ == "__main__":
