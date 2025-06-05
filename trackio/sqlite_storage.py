@@ -34,7 +34,6 @@ class SQLiteStorage:
     @staticmethod
     def _get_project_db_path(project: str) -> str:
         """Get the database path for a specific project."""
-        # Sanitize project name for filename
         safe_project_name = "".join(c for c in project if c.isalnum() or c in ('-', '_')).rstrip()
         if not safe_project_name:
             safe_project_name = "default"
@@ -155,7 +154,6 @@ class SQLiteStorage:
         if not os.path.exists(TRACKIO_DIR):
             return projects
             
-        # Find all .db files in the trackio directory
         db_files = glob.glob(os.path.join(TRACKIO_DIR, "*.db"))
         
         for db_file in db_files:
