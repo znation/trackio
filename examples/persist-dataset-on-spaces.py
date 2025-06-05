@@ -12,8 +12,8 @@ wandb.init(
         learning_rate=0.001,
         batch_size=32,
     ),
-    dataset_id="abidlabs/metrics-123",
-    space_id="abidlabs/trackio-123",
+    dataset_id="abidlabs/metrics-1234",
+    space_id="abidlabs/trackio-1234",
 )
 
 EPOCHS = 5
