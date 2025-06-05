@@ -320,7 +320,9 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard", css=css) as demo:
                         show_fullscreen_button=True,
                     )
                 plot.select(update_x_lim, outputs=x_lim, key=f"select-{metric_idx}")
-                plot.double_click(lambda: None, outputs=x_lim, key=f"double-{metric_idx}")
+                plot.double_click(
+                    lambda: None, outputs=x_lim, key=f"double-{metric_idx}"
+                )
 
 
 if __name__ == "__main__":
