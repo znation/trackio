@@ -2,7 +2,6 @@ import glob
 import json
 import os
 import sqlite3
-from pathlib import Path
 
 from huggingface_hub import CommitScheduler
 
@@ -21,7 +20,6 @@ class SQLiteStorage:
         self.project = project
         self.name = name
         self.config = config
-        # Use project-specific database file
         self.db_path = self._get_project_db_path(project)
         self.dataset_id = dataset_id
         self.scheduler = self._get_scheduler()
@@ -122,7 +120,6 @@ class SQLiteStorage:
     @staticmethod
     def get_metrics(project: str, run: str) -> list[dict]:
         """Retrieve metrics for a specific run."""
-        # Get the database path for the specific project
         db_path = SQLiteStorage._get_project_db_path(project)
         if not os.path.exists(db_path):
             return []
@@ -162,20 +159,17 @@ class SQLiteStorage:
             try:
                 with sqlite3.connect(db_file) as conn:
                     cursor = conn.cursor()
-                    # Check if the database has the expected structure
                     cursor.execute(
                         "SELECT name FROM sqlite_master WHERE type='table' AND name='metrics'"
                     )
                     if cursor.fetchone():
-                        # Get project names from this database
                         cursor.execute("SELECT DISTINCT project_name FROM metrics")
                         project_names = [row[0] for row in cursor.fetchall()]
                         projects.extend(project_names)
             except sqlite3.Error:
-                # Skip corrupted or invalid database files
                 continue
 
-        return list(set(projects))  # Remove duplicates
+        return list(set(projects))
 
     @staticmethod
     def get_runs(project: str) -> list[str]:
