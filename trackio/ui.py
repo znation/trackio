@@ -152,14 +152,43 @@ def log(
         if hf_token is None:
             raise "Expected an hf_token to be provided when logging to a Space"
         who = HfApi.whoami(hf_token)
+        access_token = who["auth"]["accessToken"]
         owner_name = os.getenv("SPACE_AUTHOR_NAME")
+        repo_name = os.getenv("SPACE_REPO_NAME")
         # make sure the token user is either the author of the space,
         # or is a member of an org that is the author.
-        # TODO: we should probably reject read-only or too-fine-grained tokens too...?
-        # but the logic to do that would be much more complex b/c of fine-grained tokens.
         orgs = [o["name"] for o in who["orgs"]]
         if owner_name != who["name"] and owner_name not in orgs:
-            raise PermissionError("Expected the provided hf_token to be the user owner of the space, or be a member of the org owner of the space")
+            raise PermissionError(
+                "Expected the provided hf_token to be the user owner of the space, or be a member of the org owner of the space"
+            )
+        # reject fine-grained tokens without specific repo access
+        if access_token["role"] == "fineGrained":
+            matched = False
+            for item in access_token["fineGrained"]["scoped"]:
+                if (
+                    item["entity"]["type"] == "space"
+                    and item["entity"]["name"] == f"{owner_name}/{repo_name}"
+                    and "repo.write" in item["permissions"]
+                ):
+                    matched = True
+                    break
+                if (
+                    item["entity"]["type"] == "user"
+                    and item["entity"]["name"] == owner_name
+                    and "repo.write" in item["permissions"]
+                ):
+                    matched = True
+                    break
+            if not matched:
+                raise PermissionError(
+                    "Expected the provided hf_token with fine grained permissions to provide write access to the space"
+                )
+        # reject read-only tokens
+        elif access_token["role"] != "write":
+            raise PermissionError(
+                "Expected the provided hf_token to provide write permissions"
+            )
     storage = SQLiteStorage(project, run, {}, dataset_id=dataset_id)
     storage.log(metrics)
 
