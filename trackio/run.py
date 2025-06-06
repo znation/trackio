@@ -29,17 +29,21 @@ class Run:
             try:
                 self.client = Client(self.url, verbose=False)
             except BaseException as e:
-                print(f"Unable to instantiate log client; error was {e}. Will queue log item and try again on next log() call.")
+                print(
+                    f"Unable to instantiate log client; error was {e}. Will queue log item and try again on next log() call."
+                )
         if self.client is None:
             # client can still be None for a Space while the Space is still initializing.
             # queue up log items for when the client is not None.
-            self.queued_logs.append(dict(
-                api_name="/log",
-                project=self.project,
-                run=self.name,
-                metrics=metrics,
-                dataset_id=self.dataset_id,
-            ))
+            self.queued_logs.append(
+                dict(
+                    api_name="/log",
+                    project=self.project,
+                    run=self.name,
+                    metrics=metrics,
+                    dataset_id=self.dataset_id,
+                )
+            )
         else:
             # flush the queued log items, if there are any
             if len(self.queued_logs) > 0:

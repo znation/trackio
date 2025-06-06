@@ -78,7 +78,11 @@ def init(
         client = Client(url, verbose=False)
     run = Run(
         url=url,
-        project=project, client=client, name=name, config=config, dataset_id=dataset_id
+        project=project,
+        client=client,
+        name=name,
+        config=config,
+        dataset_id=dataset_id,
     )
     current_run.set(run)
     globals()["config"] = run.config
