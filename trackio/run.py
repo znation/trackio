@@ -1,5 +1,5 @@
-from gradio_client import Client
 import huggingface_hub
+from gradio_client import Client
 
 from trackio.utils import generate_readable_name
 
