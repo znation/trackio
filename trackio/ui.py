@@ -157,7 +157,7 @@ def log(project: str, run: str, metrics: dict[str, Any], dataset_id: str, hf_tok
         # but the logic to do that would be much more complex b/c of fine-grained tokens.
         orgs = [o["name"] for o in who["orgs"]]
         if owner_name != who["name"] and owner_name not in orgs:
-            raise "Expected the provided hf_token to be the user owner of the space, or be a member of the org owner of the space"
+            raise PermissionError("Expected the provided hf_token to be the user owner of the space, or be a member of the org owner of the space")
     storage = SQLiteStorage(project, run, {}, dataset_id=dataset_id)
     storage.log(metrics)
 
