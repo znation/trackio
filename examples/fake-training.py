@@ -1,11 +1,12 @@
 import random
+import time
 
 from tqdm import tqdm
 
 import trackio as wandb
 
 wandb.init(
-    project="fake-training",
+    project=f"fake-training-{random.randint(10000, 99999)}",
     name="test-run",
     config=dict(
         epochs=5,
@@ -50,5 +51,6 @@ for epoch in range(EPOCHS):
             "val_accuracy": val_accuracy,
         }
     )
+    time.sleep(1)
 
 wandb.finish()

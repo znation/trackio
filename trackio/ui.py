@@ -197,11 +197,10 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard", css=css) as demo:
         run_cb = gr.CheckboxGroup(
             label="Runs", choices=[], interactive=True, elem_id="run-cb"
         )
+        gr.HTML("<hr>")
+        realtime_cb = gr.Checkbox(label="Refresh metrics realtime", value=True)
+        smoothing_cb = gr.Checkbox(label="Smooth metrics", value=True)
 
-    with gr.Sidebar(position="right", open=False) as settings_sidebar:
-        gr.Markdown("### ⚙️ Settings")
-        realtime_cb = gr.Checkbox(label="Refresh realtime", value=True)
-        smoothing_cb = gr.Checkbox(label="Smoothing", value=True)
 
     timer = gr.Timer(value=1)
     metrics_subset = gr.State([])
@@ -255,19 +254,45 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard", css=css) as demo:
     )
 
     x_lim = gr.State(None)
+    last_step = gr.State(None)
 
     def update_x_lim(select_data: gr.SelectData):
         return select_data.index
+
+    def update_last_step(project, runs):
+        """Update the last step from all runs to detect when new data is available."""
+        if not project or not runs:
+            return None
+        
+        max_step = 0
+        for run in runs:
+            metrics = SQLiteStorage.get_metrics(project, run)
+            if metrics:
+                df = pd.DataFrame(metrics)
+                if "step" not in df.columns:
+                    df["step"] = range(len(df))
+                if not df.empty:
+                    max_step = max(max_step, df["step"].max())
+        
+        return max_step if max_step > 0 else None
+
+    timer.tick(
+        fn=update_last_step,
+        inputs=[project_dd, run_cb],
+        outputs=last_step,
+        show_progress="hidden",
+    )
 
     @gr.render(
         triggers=[
             demo.load,
             run_cb.change,
-            timer.tick,
+            last_step.change,
             smoothing_cb.change,
             x_lim.change,
         ],
         inputs=[project_dd, run_cb, smoothing_cb, metrics_subset, x_lim],
+        show_progress="hidden",
     )
     def update_dashboard(project, runs, smoothing, metrics_subset, x_lim_value):
         dfs = []
