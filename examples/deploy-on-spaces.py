@@ -1,18 +1,20 @@
 import random
-import time
 
 from tqdm import tqdm
 
 import trackio as wandb
 
+project_id = random.randint(10000, 99999)
+
 wandb.init(
-    project=f"fake-training-{random.randint(10000, 99999)}",
+    project=f"fake-training-{project_id}",
     name="test-run",
     config=dict(
         epochs=5,
         learning_rate=0.001,
         batch_size=32,
     ),
+    space_id=f"abidlabs/trackio-{project_id}",
 )
 
 EPOCHS = 5
@@ -51,6 +53,5 @@ for epoch in range(EPOCHS):
             "val_accuracy": val_accuracy,
         }
     )
-    time.sleep(1)
 
 wandb.finish()
