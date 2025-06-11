@@ -201,7 +201,6 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard", css=css) as demo:
         realtime_cb = gr.Checkbox(label="Refresh metrics realtime", value=True)
         smoothing_cb = gr.Checkbox(label="Smooth metrics", value=True)
 
-
     timer = gr.Timer(value=1)
     metrics_subset = gr.State([])
     user_interacted_with_run_cb = gr.State(False)
@@ -263,7 +262,7 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard", css=css) as demo:
         """Update the last step from all runs to detect when new data is available."""
         if not project or not runs:
             return None
-        
+
         max_step = 0
         for run in runs:
             metrics = SQLiteStorage.get_metrics(project, run)
@@ -273,7 +272,7 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard", css=css) as demo:
                     df["step"] = range(len(df))
                 if not df.empty:
                     max_step = max(max_step, df["step"].max())
-        
+
         return max_step if max_step > 0 else None
 
     timer.tick(
