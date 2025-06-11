@@ -2,7 +2,7 @@
 <h1><center> 🎯 Trackio</center></h1>
 </p>
 
-`trackio` is a lightweight alternative for `wandb` that uses Hugging Face Datasets for experiment logging and Gradio / Spaces for visualization.
+`trackio` is a lightweight, free alternative for `wandb` built on top Hugging Face Datasets and Spaces.
 
 <img width="1371" alt="image" src="https://github.com/user-attachments/assets/5a42054d-8b01-49cb-acb3-d8884413904e" />
 
