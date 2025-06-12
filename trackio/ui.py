@@ -74,7 +74,7 @@ def get_projects(request: gr.Request):
     )
 
 
-def get_runs(project):
+def get_runs(project) -> list[str]:
     if not project:
         return []
     return SQLiteStorage.get_runs(project)
@@ -100,7 +100,12 @@ def load_run_data(project: str | None, run: str | None, smoothing: bool):
         df_original["data_type"] = "original"
 
         df_smoothed = df.copy()
-        df_smoothed[numeric_cols] = df_smoothed[numeric_cols].ewm(alpha=0.1).mean()
+        window_size = max(3, min(10, len(df) // 10))  # Adaptive window size
+        df_smoothed[numeric_cols] = (
+            df_smoothed[numeric_cols]
+            .rolling(window=window_size, center=True, min_periods=1)
+            .mean()
+        )
         df_smoothed["run"] = f"{run}_smoothed"
         df_smoothed["data_type"] = "smoothed"
 
@@ -122,9 +127,9 @@ def update_runs(project, filter_text, user_interacted_with_runs=False):
         if filter_text:
             runs = [r for r in runs if filter_text in r]
     if not user_interacted_with_runs:
-        return gr.CheckboxGroup(
-            choices=runs, value=[runs[0]] if runs else []
-        ), gr.Textbox(label=f"Runs ({num_runs})")
+        return gr.CheckboxGroup(choices=runs, value=runs), gr.Textbox(
+            label=f"Runs ({num_runs})"
+        )
     else:
         return gr.CheckboxGroup(choices=runs), gr.Textbox(label=f"Runs ({num_runs})")
 
@@ -143,10 +148,12 @@ def toggle_timer(cb_value):
 
 
 def log(
-    project: str, run: str, metrics: dict[str, Any], dataset_id: str, hf_token: str
+    project: str,
+    run: str,
+    metrics: dict[str, Any],
+    dataset_id: str | None,
+    hf_token: str | None,
 ) -> None:
-    # Note: the type hint for dataset_id and hf_token should be str | None but gr.api
-    # doesn't support that, see: https://github.com/gradio-app/gradio/issues/11175#issuecomment-2920203317
     if os.getenv("SYSTEM") == "spaces":  # if we are running in Spaces
         # check auth token passed in
         if hf_token is None:
@@ -300,17 +307,17 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard", css=css) as demo:
     )
 
     x_lim = gr.State(None)
-    last_step = gr.State(None)
+    last_steps = gr.State({})
 
     def update_x_lim(select_data: gr.SelectData):
         return select_data.index
 
-    def update_last_step(project, runs):
+    def update_last_steps(project, runs):
         """Update the last step from all runs to detect when new data is available."""
         if not project or not runs:
-            return None
+            return {}
 
-        max_step = 0
+        last_steps = {}
         for run in runs:
             metrics = SQLiteStorage.get_metrics(project, run)
             if metrics:
@@ -318,14 +325,18 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard", css=css) as demo:
                 if "step" not in df.columns:
                     df["step"] = range(len(df))
                 if not df.empty:
-                    max_step = max(max_step, df["step"].max())
+                    last_steps[run] = df["step"].max().item()
+                else:
+                    last_steps[run] = 0
+            else:
+                last_steps[run] = 0
 
-        return max_step if max_step > 0 else None
+        return last_steps
 
     timer.tick(
-        fn=update_last_step,
+        fn=update_last_steps,
         inputs=[project_dd, run_cb],
-        outputs=last_step,
+        outputs=last_steps,
         show_progress="hidden",
     )
 
@@ -333,7 +344,7 @@ with gr.Blocks(theme="citrus", title="Trackio Dashboard", css=css) as demo:
         triggers=[
             demo.load,
             run_cb.change,
-            last_step.change,
+            last_steps.change,
             smoothing_cb.change,
             x_lim.change,
         ],
