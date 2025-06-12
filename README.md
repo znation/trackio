@@ -101,7 +101,7 @@ trackio.show(project="my project")
 
 ## Deploying to Hugging Face Spaces
 
-When calling `trackio.init()`, by default the service will run locally and collect data on the local machine. 
+When calling `trackio.init()`, by default the service will run locally and store project data on the local machine. 
 
 If instead you pass a `space_id` to `init`, like:
 
@@ -113,7 +113,7 @@ or
 trackio.init(space_id="user_name/space_name")
 ``` 
 
-it will use an existing or automatically deploy a new Hugging Face Space as needed. The current version of trackio is deployed to the specified space if it does not yet exist.
+it will use an existing or automatically deploy a new Hugging Face Space as needed.
 
 ## Embedding a Trackio Dashboard
 
