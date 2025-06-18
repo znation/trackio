@@ -107,17 +107,17 @@ trackio.show(project="my project")
 
 When calling `trackio.init()`, by default the service will run locally and store project data on the local machine. 
 
-If instead you pass a `space_id` to `init`, like:
+But if you pass a `space_id` to `init`, like:
 
 ```py
-trackio.init(space_id="org_name/space_name")
+trackio.init(project="fake-training", space_id="org_name/space_name")
 ``` 
 or 
 ```py
-trackio.init(space_id="user_name/space_name")
+trackio.init(project="fake-training", space_id="user_name/space_name")
 ``` 
 
-it will use an existing or automatically deploy a new Hugging Face Space as needed.
+it will use an existing or automatically deploy a new Hugging Face Space as needed. You should be logged in with the `huggingface-cli` locally and your token should have write permissions to create the Space.
 
 ## Embedding a Trackio Dashboard
 
