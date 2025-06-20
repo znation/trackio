@@ -1,5 +1,8 @@
+import threading
+import time
 from collections import deque
 
+import backoff
 import huggingface_hub
 from gradio_client import Client
 
@@ -18,11 +21,35 @@ class Run:
     ):
         self.url = url
         self.project = project
-        self.client = client
+        self._client_lock = threading.Lock()
+        self._client = client
         self.name = name or generate_readable_name()
         self.config = config or {}
         self.dataset_id = dataset_id
-        self.queued_logs = deque()
+        self._queued_logs = deque()
+
+        if client is None:
+            # kick off a thread to initialize the client
+            threading.Thread(target=self._init_client_background).start()
+
+    def _init_client_background(self):
+        fib = backoff.fibo()
+        for sleep_coefficient in fib:
+            try:
+                client = Client(self.url, verbose=False)
+                with self._client_lock:
+                    print("[trackio] Successfully initialized client in background.")
+                    self._client = client
+                    # flush the queued log items, if there are any
+                    if len(self._queued_logs) > 0:
+                        for queued_log in self._queued_logs:
+                            self._client.predict(**queued_log)
+                        self._queued_logs.clear()
+                    break
+            except Exception as e:
+                print(f"[trackio] Failed to initialize client in background: {e}")
+            if sleep_coefficient is not None:
+                time.sleep(0.1 * sleep_coefficient)
 
     def log(self, metrics: dict):
         for k in metrics.keys():
@@ -30,19 +57,26 @@ class Run:
                 raise ValueError(
                     f"Please do not use this reserved key as a metric: {k}"
                 )
-        if self.client is None:
-            # lazily try to initialize the client
-            try:
-                self.client = Client(self.url, verbose=False)
-            except BaseException as e:
-                print(
-                    f"Unable to instantiate log client; error was {e}. Will queue log item and try again on next log() call."
+        with self._client_lock:
+            if self._client is None:
+                # client can still be None for a Space while the Space is still initializing.
+                # queue up log items for when the client is not None.
+                self._queued_logs.append(
+                    dict(
+                        api_name="/log",
+                        project=self.project,
+                        run=self.name,
+                        metrics=metrics,
+                        dataset_id=self.dataset_id,
+                        hf_token=huggingface_hub.utils.get_token(),
+                    )
                 )
-        if self.client is None:
-            # client can still be None for a Space while the Space is still initializing.
-            # queue up log items for when the client is not None.
-            self.queued_logs.append(
-                dict(
+            else:
+                assert (
+                    len(self._queued_logs) == 0
+                )  # queue should have been flushed on client init
+                # write the current log item
+                self._client.predict(
                     api_name="/log",
                     project=self.project,
                     run=self.name,
@@ -50,22 +84,6 @@ class Run:
                     dataset_id=self.dataset_id,
                     hf_token=huggingface_hub.utils.get_token(),
                 )
-            )
-        else:
-            # flush the queued log items, if there are any
-            if len(self.queued_logs) > 0:
-                for queued_log in self.queued_logs:
-                    self.client.predict(**queued_log)
-                self.queued_logs.clear()
-            # write the current log item
-            self.client.predict(
-                api_name="/log",
-                project=self.project,
-                run=self.name,
-                metrics=metrics,
-                dataset_id=self.dataset_id,
-                hf_token=huggingface_hub.utils.get_token(),
-            )
 
     def finish(self):
         """Cleanup when run is finished."""
