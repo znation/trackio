@@ -22,6 +22,7 @@ class Run:
         self.url = url
         self.project = project
         self._client_lock = threading.Lock()
+        self._client_thread = None
         self._client = client
         self.name = name or generate_readable_name()
         self.config = config or {}
@@ -29,7 +30,8 @@ class Run:
         self._queued_logs = deque()
 
         if client is None:
-            threading.Thread(target=self._init_client_background).start()
+            self._client_thread = threading.Thread(target=self._init_client_background)
+            self._client_thread.start()
 
     def _init_client_background(self):
         fib = backoff.fibo()
@@ -85,4 +87,6 @@ class Run:
 
     def finish(self):
         """Cleanup when run is finished."""
-        pass
+        # wait for background client thread, in case it has a queue of logs to flush.
+        if self._client_thread is not None:
+            self._client_thread.join()
