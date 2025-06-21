@@ -40,7 +40,6 @@ class Run:
                 with self._client_lock:
                     print("[trackio] Successfully initialized client in background.")
                     self._client = client
-                    # flush the queued log items, if there are any
                     if len(self._queued_logs) > 0:
                         for queued_log in self._queued_logs:
                             self._client.predict(**queued_log)
