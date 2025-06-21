@@ -29,7 +29,6 @@ class Run:
         self._queued_logs = deque()
 
         if client is None:
-            # kick off a thread to initialize the client
             threading.Thread(target=self._init_client_background).start()
 
     def _init_client_background(self):
